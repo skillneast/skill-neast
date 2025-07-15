@@ -24,11 +24,18 @@ async def get_file_ids(message):
     file_id = await parse_file_id(message)
     setattr(file_id, "file_size", getattr(media, "file_size", 0))
     setattr(file_id, "mime_type", getattr(media, "mime_type", ""))
-    setattr(file_id, "file_name", getattr(media, "file_name", ""))
+    # get_name function ab iska khayal rakhega
+    setattr(file_id, "file_name", get_name(message))
     setattr(file_id, "unique_id", file_unique_id)
     return file_id
 
 def get_media_from_message(message: "Message") -> Any:
+    """
+    FORWARDED FILES KO HANDLE KARNE KE LIYE UPDATED
+    """
+    # Agar message forward kiya gaya hai, to original message ko check karo
+    msg_to_check = message.forward_from_message or message
+    
     media_types = (
         "audio",
         "document",
@@ -39,19 +46,31 @@ def get_media_from_message(message: "Message") -> Any:
         "voice",
         "video_note",
     )
+    # Ab yeh sahi message (original ya naya) se media nikalega
     for attr in media_types:
-        media = getattr(message, attr, None)
+        media = getattr(msg_to_check, attr, None)
         if media:
             return media
-
 
 def get_hash(media_msg: Message) -> str:
     media = get_media_from_message(media_msg)
     return getattr(media, "file_unique_id", "")[:6]
 
 def get_name(media_msg: Message) -> str:
+    """
+    MISSING FILE NAME KO HANDLE KARNE KE LIYE UPDATED
+    """
     media = get_media_from_message(media_msg)
-    return getattr(media, 'file_name', "")
+    if not media:
+        return ""
+
+    # Pehle file ka asli naam lene ki koshish karo
+    file_name = getattr(media, 'file_name', None)
+    if file_name:
+        return file_name
+    
+    # Agar asli naam na mile, to unique id istemal karo
+    return getattr(media, 'file_unique_id', "")
 
 def get_media_file_size(m):
     media = get_media_from_message(m)
