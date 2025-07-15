@@ -97,8 +97,8 @@
             border: 1px solid rgba(0, 170, 255, 0.4);
         }
         .player-logo img {
-            width: 90px;
-            height: 90px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid rgba(255, 255, 255, 0.7);
@@ -241,7 +241,7 @@
         /* Media Queries */
         @media (max-width: 768px) {
             .file-title { font-size: 1.2rem; }
-            .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
+            .player-logo img { width: 40px; height: 40px; top: 15px; left: 15px; }
             .action-buttons-container { gap: 0.5rem; }
             .action-button { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
         }
@@ -316,7 +316,7 @@
     
     <section id="about-section">
         <div class="container text-center">
-            <h2 class="glowing-text mb-4 display-5 fw-bold">📚 Education for All ✨</h2>
+            <h2 class="glowing-text mb-4 display-5 fw-bold">Education for All 📚✨</h2>
             <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="About Logo" class="about-logo">
             <p class="lead mb-5">
                 Explore our other websites where all paid content is available for free. Visit now!
@@ -422,26 +422,6 @@
                     sources: [ { src: videoSource, type: 'video/mp4' } ]
                 };
             }
-
-            // ===================================================================
-            // ===== नया कोड यहाँ जोड़ें / ADD NEW CODE HERE =====
-            // ===================================================================
-            // यह कोड लोगो को प्लेयर के कंटेनर में ले जाएगा ताकि वह फुल-स्क्रीन में दिखे।
-            player.on('ready', (event) => {
-                const playerLogo = document.querySelector('.player-logo');
-                const instance = event.detail.plyr;
-                const container = instance.elements.container;
-                
-                if (playerLogo && container) {
-                    // Move the logo inside the Plyr container.
-                    // This ensures it's part of the element that goes fullscreen.
-                    container.appendChild(playerLogo);
-                }
-            });
-            // ===================================================================
-            // ===== नए कोड का अंत / END OF NEW CODE =====
-            // ===================================================================
-
 
             const fileTitleElement = document.getElementById('file-title');
             const fileTitle = fileTitleElement.textContent;
