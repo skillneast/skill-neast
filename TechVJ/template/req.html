@@ -2,186 +2,483 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" type="image/x-icon">
-    <meta property="og:image" content="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" itemprop="thumbnailUrl">
+    <link rel="shortcut icon" href="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" type="image/x-icon">
+    <meta property="og:image" content="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" itemprop="thumbnailUrl">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{file_name}} | {{name}}</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.js"></script>    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script>
-        var userId = "{{user_id}}";
-	var hasSpent30Seconds = false;
-        var clickCounted = false;
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
-        function setSpentTimeFlag() {
-            hasSpent30Seconds = true;
+    <style>
+        :root {
+            --primary-glow: #00aaff;
+            --secondary-glow: #ff00de;
+            --body-bg: #050208;
         }
 
-        setTimeout(setSpentTimeFlag, 30000); // 30000 milliseconds = 30 seconds
+        /* Layout & Footer Fix */
+        html, body {
+            height: 100%;
+            scroll-behavior: smooth; /* For smooth scrolling */
+        }
+        body {
+            background-color: var(--body-bg);
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex-grow: 1; /* Pushes footer down */
+        }
+        .player-wrapper {
+            visibility: hidden;
+        }
+        .player-wrapper.animate__animated {
+            visibility: visible;
+        }
+        
+        /* Animations */
+        @keyframes text-glow {
+            0%, 100% { text-shadow: 0 0 5px var(--primary-glow), 0 0 10px var(--primary-glow); }
+            50% { text-shadow: 0 0 10px var(--secondary-glow), 0 0 20px var(--secondary-glow); }
+        }
+        @keyframes container-glow {
+            0%, 100% { box-shadow: 0 0 20px -5px rgba(0, 170, 255, 0.4); }
+            50% { box-shadow: 0 0 25px -5px rgba(255, 0, 222, 0.6); }
+        }
+        @keyframes shine {
+            100% { left: 125%; }
+        }
 
-        document.addEventListener("click", function(event) {
-            if (hasSpent30Seconds && !clickCounted) {
-                clickCounted = true;
-                fetch('/click-counter', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ user_id: userId })  // Send user_id in the request body
-                })
-                .then(response => response.json())
-                .catch(error => console.error('Error:', error));
-            }
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type='text/css' href="https://drive----google.com/uc?export=view&id=1pVLG4gZy7jdow3sO-wFS06aP_A9QX0O6">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Delius">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.9/plyr.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+        /* Navbar & Title */
+        .navbar {
+            background: rgba(10, 10, 10, 0.7) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 170, 255, 0.3);
+        }
+        .glowing-text {
+            animation: text-glow 4s ease-in-out infinite;
+        }
+        .file-title {
+            font-size: 1.75rem;
+        }
+        .nav-link-about {
+            color: #f0f0f0;
+            text-decoration: none;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .nav-link-about::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-glow);
+            transition: width 0.3s ease-in-out;
+        }
+        .nav-link-about:hover::after {
+            width: 100%;
+        }
+
+
+        /* Player & Logo */
+        .player-wrapper {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            animation: container-glow 5s ease-in-out infinite alternate;
+            border: 1px solid rgba(0, 170, 255, 0.4);
+        }
+        .player-logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .player-logo img:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        
+        /* Buttons */
+        .action-button, .cta-button {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--primary-glow);
+            color: #f0f0f0;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover, .cta-button:hover {
+            color: #fff;
+            background: var(--primary-glow);
+            box-shadow: 0 0 25px var(--primary-glow);
+            transform: translateY(-4px);
+        }
+        .action-button.active {
+             background: var(--primary-glow);
+             color: #fff;
+             box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .cta-button {
+            background: var(--primary-glow);
+            color: #fff;
+        }
+        .cta-button:hover {
+            background: var(--secondary-glow);
+            border-color: var(--secondary-glow);
+            box-shadow: 0 0 25px var(--secondary-glow);
+        }
+        
+        /* Shine Effect */
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -25%;
+            width: 50%;
+            height: 200%;
+            opacity: 0;
+            transform: rotate(35deg);
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.75s ease;
+        }
+        .action-button:hover .shine-effect::after, .cta-button:hover .shine-effect::after, .custom-btn:hover .shine-effect::after {
+            left: 125%;
+            opacity: 1;
+        }
+
+        /* Disclaimer */
+        .disclaimer-box {
+            background: linear-gradient(135deg, rgba(90, 0, 255, 0.1), rgba(0, 170, 255, 0.1));
+            border: 1px solid rgba(137, 83, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- NEW ABOUT SECTION STYLES --- */
+        #about-section {
+            padding: 60px 0;
+            border-top: 1px solid rgba(0, 170, 255, 0.2);
+            background: var(--body-bg);
+        }
+        .about-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-glow);
+            box-shadow: 0 0 25px rgba(0, 170, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        .custom-btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #f0f0f0;
+            background: rgba(10, 10, 10, 0.7);
+            border: 1px solid var(--primary-glow);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 120px;
+            text-align: center;
+            transition: all 0.3s ease;
+            overflow: hidden; /* For shine effect */
+        }
+        .custom-btn:hover {
+            color: #fff;
+            transform: translateY(-5px);
+            background: var(--primary-glow);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+        .custom-btn .btn-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .custom-btn .btn-subtitle {
+            font-size: 0.8rem;
+            color: #ccc;
+            transition: color 0.3s ease;
+        }
+        .custom-btn:hover .btn-subtitle {
+            color: #fff;
+        }
+        .telegram-btn {
+            background: var(--primary-glow);
+            color: #fff;
+        }
+         .telegram-btn:hover {
+            background: var(--secondary-glow);
+            border-color: var(--secondary-glow);
+            box-shadow: 0 0 25px var(--secondary-glow);
+        }
+
+
+        /* Modal */
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid var(--secondary-glow);
+        }
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .file-title { font-size: 1.2rem; }
+            .player-logo img { width: 40px; height: 40px; top: 15px; left: 15px; }
+            .action-buttons-container { gap: 0.5rem; }
+            .action-button { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+        }
+    </style>
 </head>
 
-<body class="bg-black">
-    <header>
-        <!-- Navbar -->
-            <nav class="navbar bg-dark p-lg-4 p-2">
-               <div class="d-flex ">
-                <!-- web title -->
-                <div class="container-fluid">
-                    <a class="navbar-brand  text-light fw-bold " href="{{link}}">
-                        <span class="bg-clip-text sm:text-[25px] text-[22px] text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
-                            {{name}}
-                          </span>
-                    </a>
-                  </div>
-               </div>
-            </nav>
-            <!-- ./Navbar -->
-    </header>
-    <div class="bg-black  text-light"  >
-        <!-- file Name -> to be displayed here  -->
-	<div class="justify-content-center align-items-center w-100 d-flex">
-            <div id="file-name" class="tex-center text-lg max:w-74  p-2 flex-wrap text-center justify-center items-center">
-                <p class="fw-bold"> 
-                    <span id="myDiv" class="h6 flex-wrap text-center font-bold justify-center items-center card-title wow animate__animated animate__fadeInRight" >
-                        {{file_name}}
+<body>
+    <header class="animate__animated animate__fadeInDown">
+        <nav class="navbar sticky-top p-lg-3 p-2">
+            <div class="container-fluid">
+                <a class="navbar-brand text-light fw-bold" href="{{link}}">
+                    <span class="glowing-text bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-pink-500 fs-4">
+                        {{name}}
                     </span>
-                </p>
-            </div>
-	</div>
-        <!-- Online Video Player -> to be displayed here  -->
-        <div class="justify-content-center align-items-center w-100 d-flex  flex-wrap">
-            <div class="lg:w-9/12 lg:px-12 lg:py-4 w-full  border border-danger wow animate__animated animate__fadeInLeft">
-                <video id="player" class="player" playsinline controls>
-                    {% if file_url %}
-                    <source src="{{file_url}}" type="video/mp4" size="480">
-                    {% endif %}
-                    {% if file_url_two %}
-                    <source src="{{file_url_two}}" type="video/mp4" size="720">
-                    {% endif %}
-                    {% if file_url_three %}
-                    <source src="{{file_url_three}}" type="video/mp4" size="1080">
-                    {% endif %}			
-                </video>		    
-            </div>
-		<a href="{{link}}" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded mt-4">
-                    Join Telegram Channel
                 </a>
+                <a href="#about-section" class="nav-link-about fw-bold">About Me</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content container py-4">
+        <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
+            <h1 id="file-title" class="file-title fw-bold">{{file_name}}</h1>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-11">
+                <div class="player-wrapper mb-4">
+                    <a href="{{link}}" target="_blank" class="player-logo">
+                        <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo">
+                    </a>
+                    <video id="player" class="player" playsinline controls></video>
+                </div>
+            </div>
         </div>
 
-            <div class="justify-content-center align-items-center w-100 d-flex mb-3 mt-4">
-                <div class="row d-flex w-100 justify-content-center align-items-center">
-                    <div class="col-lg-8 col-10  py-2 text-center bg-danger rounded-4 text-sm font-bold wow animate__animated animate__FadeIn">
-                            Video Not Playing ? Possibly Because Your Browser Doesn't Support Codec Please Open Link In Another Browser.
-                    </div>
+        <div class="d-flex justify-content-center flex-nowrap gap-3 my-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <button id="like-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
+                <i class="bi bi-heart-fill"></i> Like <span id="like-count" class="badge bg-light text-dark ms-1">0</span>
+            </button>
+            <button id="comment-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
+                <i class="bi bi-chat-right-dots-fill"></i> Comment
+            </button>
+            <button id="timeline-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
+                <i class="bi bi-clock-history"></i> Timeline
+            </button>
+        </div>
+        
+        <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <a href="{{link}}" target="_blank" class="btn cta-button btn-lg rounded-pill shine-effect">
+                <i class="bi bi-telegram"></i> Join Telegram Channel
+            </a>
+        </div>
+
+        <div class="row justify-content-center mt-5 animate__animated animate__fadeInUp animate__delay-2s">
+            <div class="col-12 col-lg-10">
+                <div class="disclaimer-box p-4 rounded-4">
+                    <h4 class="fw-bold text-center mb-3 glowing-text"><i class="bi bi-shield-check"></i> Disclaimer</h4>
+                    <p class="text-center small mb-3">This website operates under the principle of **"Education for All."** The content provided here, including all video streams, is intended solely for **informational and educational purposes.**</p>
+                    <p class="text-center small mb-3">We do not host, own, or upload any media content displayed on this platform. All media is sourced from and streamed through third-party services and platforms that are publicly available. We are not responsible for the accuracy, legality, or copyright compliance of the content from these external sources.</p>
+                    <p class="text-center small">By using our service, you acknowledge and agree that you are accessing this content at your own risk. It is the user's responsibility to ensure that their use of any content from this website complies with the laws and regulations of their jurisdiction. We strongly encourage our users to support the original content creators.</p>
                 </div>
             </div>
+        </div>
+    </main>
+    
+    <section id="about-section">
+        <div class="container text-center">
+            <h2 class="glowing-text mb-4 display-5 fw-bold">Education for All 📚✨</h2>
+            <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="About Logo" class="about-logo">
+            <p class="lead mb-5">
+                Explore our other websites where all paid content is available for free. Visit now!
+            </p>
 
-	    <div class="justify-content-center align-items-center w-100 d-flex mb-3">
-                <div class="row d-flex w-100 justify-content-center align-items-center">
-                    <div class="col-lg-8 col-10  py-2 text-center bg-danger rounded-4 text-sm font-bold wow animate__animated animate__FadeIn">
-                            ⚠️ Disclaimer :- The content available on This Website is for informational and entertainment purposes only. We do not host any videos; all media is sourced from third-party platforms, and we are not responsible for their content or availability. By using our website, you acknowledge that you do so at your own risk, and we encourage you to verify the legality of any content in your jurisdiction.
-                    </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect">
+                        <span class="btn-title">SkillNeast</span>
+                        <span class="btn-subtitle">All paid courses are free</span>
+                    </a>
                 </div>
-	    </div>
-	    
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect">
+                        <span class="btn-title">PDFNeast</span>
+                        <span class="btn-subtitle">All paid book PDFs are free</span>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect">
+                        <span class="btn-title">CoderNeast</span>
+                        <span class="btn-subtitle">Paid coding courses are free</span>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect">
+                        <span class="btn-title">StudyNeast</span>
+                        <span class="btn-subtitle">Study batches are free</span>
+                    </a>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect telegram-btn">
+                        <span class="btn-title"><i class="bi bi-telegram"></i> Join Telegram</span>
+                        <span class="btn-subtitle">For updates & new content</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <footer class="bg-dark mt-auto">
+        <div class="text-center p-3 text-secondary">
+            © <script>document.write(new Date().getFullYear())</script> Copyright:
+            <a class="glowing-text fw-bold text-decoration-none" href="{{link}}">{{name}}</a> All Rights Reserved.
+        </div>
+    </footer>
+
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center h4 py-5" id="modalBody"></div>
+            </div>
+        </div>
     </div>
 
-        <footer class="bg-dark justify-content-around align-items-center">
-        <div class="text-center text-xs p-3 dark:text-light text-light gap-2" style="background-color: rgba(0, 0, 0, 0.2);">
-            ©  <script type="text/JavaScript">
-                var theDate=new Date() 
-                    document.write(theDate.getFullYear()) 
-            </script> Copyright :
-                <a class="bg-clip-text text-[16px] text-transparent bg-gradient-to-r from-pink-500 to-violet-500 font-bold tracking-wide px-1" href="{{link}}">{{name}}</a>             
-                All Right Reserved
-            </div>   
-        </footer>
-
-    <script src="js/wow.min.js"></script>
-    <script>
-        new WOW().init();
-    </script>
-    <script>
-        var div = document.getElementById('myDiv');
-        var text = div.textContent;
-
-        if(text.length > 60){
-            div.textContent = text.slice(0, 60);
-        }
-
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     
-    <script src="https://cdn.plyr.io/3.6.9/plyr.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <script>
-        const controls = [
-            'play-large',
-            'rewind',
-            'play',
-            'fast-forward',
-            'progress',
-            'current-time',
-            'duration',
-            'mute',
-            'volume',
-            'captions',
-            'settings',
-            'pip',
-            'airplay',     
-            'fullscreen'
-        ];
-
         document.addEventListener('DOMContentLoaded', () => {
-            const player = Plyr.setup('.player', {
-                controls
+            
+            // --- JAVASCRIPT ANIMATION TRIGGER ---
+            const playerWrapper = document.querySelector('.player-wrapper');
+            if(playerWrapper) {
+                setTimeout(() => {
+                    playerWrapper.classList.add('animate__animated', 'animate__zoomIn');
+                }, 100); 
+            }
+            
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyC1m25mHpA59xBQmF34BfA1K_vY2pUSrLI",
+                authDomain: "fahad-portfolio-81c65.firebaseapp.com",
+                databaseURL: "https://fahad-portfolio-81c65-default-rtdb.firebaseio.com",
+                projectId: "fahad-portfolio-81c65",
+                storageBucket: "fahad-portfolio-81c65.firebasestorage.app",
+                messagingSenderId: "510625882446",
+                appId: "1:510625882446:web:b23f76808b3dd0e79a3e1f",
+                measurementId: "G-J5S5PLWE7J"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            
+            // Player Setup
+            const player = new Plyr('#player', {
+                controls: ['play-large', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen']
+            });
+
+            const videoSource = `{{file_url}}`;
+            if(videoSource) {
+                player.source = {
+                    type: 'video',
+                    sources: [ { src: videoSource, type: 'video/mp4' } ]
+                };
+            }
+
+            const fileTitleElement = document.getElementById('file-title');
+            const fileTitle = fileTitleElement.textContent;
+            if (fileTitle.length > 70) {
+                fileTitleElement.textContent = fileTitle.slice(0, 70) + '...';
+            }
+            
+            const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
+
+            // UI Elements
+            const likeBtn = document.getElementById('like-btn');
+            const likeCountSpan = document.getElementById('like-count');
+            const commentBtn = document.getElementById('comment-btn');
+            const timelineBtn = document.getElementById('timeline-btn');
+            
+            const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            // --- Firebase Like Logic ---
+            const likesRef = database.ref('likes/' + videoId);
+            let isLiked = localStorage.getItem(videoId + '_liked') === 'true';
+            
+            if (isLiked) {
+                likeBtn.classList.add('active');
+            }
+            
+            likesRef.on('value', (snapshot) => {
+                const likeCount = snapshot.val() || 0;
+                likeCountSpan.textContent = likeCount;
+            });
+
+            likeBtn.addEventListener('click', () => {
+                isLiked = !isLiked;
+                localStorage.setItem(videoId + '_liked', isLiked);
+                likeBtn.classList.toggle('active', isLiked);
+                
+                likesRef.transaction((currentLikes) => {
+                    return isLiked ? (currentLikes || 0) + 1 : (currentLikes || 1) - 1;
+                });
+            });
+
+            // --- Modal Logic ---
+            commentBtn.addEventListener('click', () => {
+                modalTitle.textContent = '📝 Comments Section';
+                modalBody.innerHTML = 'Our comment section is<br><strong>Coming Soon!</strong> 🔜';
+                infoModal.show();
+            });
+
+            timelineBtn.addEventListener('click', () => {
+                modalTitle.textContent = '⏳ Timeline Feature';
+                modalBody.innerHTML = 'The timeline feature is under development.<br><strong>Coming Soon!</strong> 🚀';
+                infoModal.show();
+            });
+
+            // --- Security ---
+            document.addEventListener("contextmenu", e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+                    e.preventDefault();
+                }
             });
         });
     </script>
-    <!-- disabling right click -->
-    <script>
-        document.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-    });
-    document.addEventListener('keydown', function (e) {
-        if (
-            e.key === 'F12' ||
-            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-            (e.ctrlKey && e.key === 'u') ||
-            e.ctrlKey ||
-            e.shiftKey ||
-            e.altKey
-        ) {
-            e.preventDefault();
-        }
-    });
-    </script>
-    
 </body>
 </html>
-
-<!--  Don't Remove Credit @VJ_Bot Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
