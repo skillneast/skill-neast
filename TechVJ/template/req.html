@@ -109,6 +109,7 @@
             color: #f0f0f0;
             background: transparent;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
         .action-button:hover, .cta-button:hover {
             color: #fff;
@@ -259,7 +260,7 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-center flex-nowrap gap-3 my-4 animate__animated animate__fadeInUp">
+        <div class="d-flex justify-content-center flex-wrap gap-3 mb-3 animate__animated animate__fadeInUp">
             <button id="like-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
                 <i class="bi bi-heart-fill"></i> Like <span id="like-count" class="badge bg-light text-dark ms-1">0</span>
             </button>
@@ -271,6 +272,11 @@
             </button>
         </div>
         
+        <div class="text-center my-4 animate__animated animate__fadeInUp">
+             <a href="{{file_url}}" id="download-btn" class="btn cta-button btn-lg rounded-pill shine-effect px-5 py-3" download>
+                <i class="bi bi-download"></i> Download Video
+            </a>
+        </div>
         <div class="text-center my-4 animate__animated animate__fadeInUp">
             <a href="{{link}}" target="_blank" class="btn cta-button btn-lg rounded-pill shine-effect">
                 <i class="bi bi-telegram"></i> Join Telegram Channel
@@ -360,8 +366,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // JAVASCRIPT ANIMATION TRIGGER REMOVED FROM HERE FOR RELIABILITY
-            
             const firebaseConfig = {
                 apiKey: "AIzaSyC1m25mHpA59xBQmF34BfA1K_vY2pUSrLI",
                 authDomain: "fahad-portfolio-81c65.firebaseapp.com",
@@ -380,7 +384,7 @@
                 controls: ['play-large', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen']
             });
 
-            // This is the most critical part for your bot
+            // YAHAN PAR CHECK HOTA HAI - YEH BOT KI ZIMMEDARI HAI
             const videoSource = `{{file_url}}`;
             if(videoSource && videoSource !== '{{file_url}}') { // Check if the bot replaced the variable
                 player.source = {
@@ -388,7 +392,7 @@
                     sources: [ { src: videoSource, type: 'video/mp4' } ]
                 };
             } else {
-                // If the bot fails to provide a URL, show an error inside the player
+                // AGAR BOT {{file_url}} REPLACE NAHI KARTA TOH YEH ERROR AATA HAI
                 const playerContainer = document.querySelector('.player-wrapper');
                 playerContainer.innerHTML = `<div style="padding: 50px; text-align: center; font-size: 1.2rem;">Error: Video URL not found. Please check bot configuration.</div>`;
             }
