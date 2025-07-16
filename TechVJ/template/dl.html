@@ -2,143 +2,191 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" type="image/x-icon">
-    <meta property="og:image" content="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" itemprop="thumbnailUrl">
+    <link rel="shortcut icon" href="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" type="image/x-icon">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>%s | Tech VJ</title>
+    <title>Downloading {{file_name}} | {{name}}</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type='text/css' href="https://drive----google.com/uc?export=view&id=1pVLG4gZy7jdow3sO-wFS06aP_A9QX0O6">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Delius">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.9/plyr.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <style>
+        :root {
+            --primary-glow: #00aaff;
+            --secondary-glow: #ff00de;
+            --body-bg: #050208;
+        }
+
+        /* Layout & Structure */
+        html, body {
+            height: 100%;
+        }
+        body {
+            background-color: var(--body-bg);
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            text-align: center;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* Animations */
+        @keyframes text-glow {
+            0%, 100% { text-shadow: 0 0 5px var(--primary-glow), 0 0 10px var(--primary-glow); }
+            50% { text-shadow: 0 0 10px var(--secondary-glow), 0 0 20px var(--secondary-glow); }
+        }
+        @keyframes container-glow {
+            0%, 100% { box-shadow: 0 0 25px -5px rgba(0, 170, 255, 0.4); }
+            50% { box-shadow: 0 0 30px -5px rgba(255, 0, 222, 0.6); }
+        }
+
+        /* Header & Footer */
+        .header, .footer {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            padding: 20px;
+        }
+        .header {
+            top: 0;
+            border-bottom: 1px solid rgba(0, 170, 255, 0.3);
+        }
+        .footer {
+            bottom: 0;
+            background: #0d0c0e;
+        }
+
+        /* Content Styles */
+        .glowing-text {
+            animation: text-glow 4s ease-in-out infinite;
+        }
+        .download-box {
+            background: rgba(10, 10, 10, 0.5);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            animation: container-glow 5s ease-in-out infinite alternate;
+            max-width: 600px;
+        }
+        .file-name {
+            font-size: 2rem;
+            word-break: break-all;
+        }
+        .sub-text {
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+        #redirect-message {
+            display: none;
+            color: var(--primary-glow);
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .download-button {
+            border: 1px solid var(--primary-glow);
+            color: #f0f0f0;
+            background: var(--primary-glow);
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        .download-button:hover {
+            color: #fff;
+            background: var(--secondary-glow);
+            border-color: var(--secondary-glow);
+            box-shadow: 0 0 25px var(--secondary-glow);
+            transform: translateY(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .file-name { font-size: 1.5rem; }
+            .sub-text { font-size: 1rem; }
+            .download-box { padding: 30px; }
+        }
+    </style>
 </head>
 
-<body class='bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500'>
-    <header>
-        <nav class="navbar bg-dark p-lg-4 p-2">
-                <div class="container-fluid">
-                    <a class="navbar-brand  text-light fw-bold " href="https://telegram.me/VJ_Disk">
-                        <span class="bg-clip-text sm:text-[25px] text-[22px] text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
-                            VJ Disk
-                        </span>
-                    </a>
-                    </div>
-               </div>
-            </nav>
-            </header>
-    <div class="bg-black  text-light"  >
-        <div class="justify-content-center align-items-center w-100 d-flex">
-            <div id="file-name" class="tex-center text-lg max:w-74  p-2 flex-wrap text-center justify-center items-center">
-                <p class="fw-bold"> 
-                    <span id="myDiv" class="h6 flex-wrap text-center justify-center items-center card-title wow animate__animated animate__fadeInRight" >
-                        %s
-                    </span>
-                </p>
-            </div>
-        </div>
-    </div>
+<body>
+    <header class="header">
+        <a class="glowing-text fw-bold text-decoration-none fs-4" href="{{link}}">{{name}}</a>
+    </header>
 
-    <div class="container flex justify-center items-center min-h-screen ">
-        <a id="downloadLink" class="w-full flex justify-center items-center " href=%s>
-            <div class="col-lg-4 p-2 col-12 rounded-3xl bg-dark text-white text-center align-items-center hover:bg-gradient-to-r from-pink-500 to-violet-500 hover:shadow-md hover:shadow-gray-100 hover:translate-y-[-5px] transition transition-all duration-300 wow animate__animated animate__rubberBand">
-                Download
-                <span aria-hidden>_</span>
-                <span aria-hidden class="">_404 Error</span>
-                <span aria-hidden class="">_%s</span>
-            </div>
-        </a>
-    </div>
-    
-    <footer class="bg-dark justify-content-around align-items-center">
-        <div class="container-fluid  justify-content-center align-itemsd x. -center">
-                </div> 
-            <div class=" justify-center items-center text-center w-full text-center flex ">
-                <div  class="text-gray-400 text-center sm:-m-1 -ms-4 m-2 p-2">
-                    <h5>
-                        
-                    </h5>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="text-center text-xs p-3 dark:text-light text-light gap-2" style="background-color: rgba(0, 0, 0, 0.2);">
-        
-        ©  <script type="text/JavaScript">
-            var theDate=new Date() 
-                document.write(theDate.getFullYear()) 
-        </script> Copyright :
-            <a class="bg-clip-text text-[16px] text-transparent bg-gradient-to-r from-pink-500 to-violet-500 font-bold tracking-wide px-1" href="https://youtube.com/@Tech_VJ">Tech VJ</a>
+    <main class="main-content">
+        <div class="download-box animate__animated animate__zoomIn">
+            <h1 class="file-name fw-bold mb-3">{{file_name}}</h1>
+            <p class="sub-text mb-4">आपका डाउनलोड जल्द ही शुरू होगा...</p>
             
-            All Right Reserved
-        </div>  
+            <a href="{{file_url}}" download="{{file_name}}" class="btn download-button btn-lg rounded-pill shine-effect px-5 py-2">
+                <i class="bi bi-download"></i> Download Now
+            </a>
+            
+            <p id="redirect-message" class="mt-4 mb-0">आपको टेलीग्राम पर वापस भेजा जा रहा है...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="text-center p-2 text-secondary">
+            © <script>document.write(new Date().getFullYear())</script> Copyright:
+            <a class="glowing-text fw-bold text-decoration-none" href="{{link}}">{{name}}</a> All Rights Reserved.
+        </div>
     </footer>
 
-    <script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
     <script>
-        const controls = [
-                'play-large',
-                'rewind',
-                'play', 
-                'fast-forward', 
-                'progress', 
-                'current-time',
-                'duration',
-                'mute',
-                'volume',
-                'captions',
-                'settings',
-                'pip',
-                'airplay',
-                'download',
-                'fullscreen'
-            ];
         document.addEventListener('DOMContentLoaded', () => {
-            const player = Plyr.setup('.player', { controls });
-        });
+            // --- Security (optional) ---
+            document.addEventListener("contextmenu", e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+                    e.preventDefault();
+                }
+            });
 
+            // --- Auto Download Logic ---
+            const fileUrl = '{{file_url}}';
+            const fileName = '{{file_name}}';
+            const telegramLink = '{{link}}';
 
-    </script>
-        <script src="js/wow.min.js"></script>
-        <script>
-            new WOW().init();
-        </script>
-        <script>
-            var div = document.getElementById('myDiv');
-            var text = div.textContent;
-    
-            if(text.length > 60){
-                div.textContent = text.slice(0, 60)+"....";
+            // Check if the fileUrl variable has been replaced by your system
+            if (fileUrl && fileUrl !== '{{' + 'file_url' + '}}') {
+                
+                // Create a temporary link element to trigger the download
+                const tempLink = document.createElement('a');
+                tempLink.style.display = 'none';
+                tempLink.href = fileUrl;
+                tempLink.setAttribute('download', fileName || 'download');
+
+                // Append to the body, click it, and then remove it
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+
+                // Optional: Redirect back to the Telegram channel after a delay
+                if (telegramLink && telegramLink !== '{{' + 'link' + '}}') {
+                    const messageElement = document.getElementById('redirect-message');
+                    // Show a message before redirecting
+                    if(messageElement) {
+                        setTimeout(() => {
+                            messageElement.style.display = 'block';
+                        }, 1500); // Wait 1.5 seconds before showing the message
+                    }
+                    // Redirect after another delay
+                    setTimeout(() => {
+                        window.location.href = telegramLink;
+                    }, 4500); // Wait 4.5 seconds in total before redirecting
+                }
             }
-    
-        </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // File ka naam "myDiv" span se lena
-            const fileNameElement = document.getElementById('myDiv');
-            const fileName = fileNameElement.textContent.trim(); // Faltu space hatane ke liye .trim()
-
-            // Download link ko uske ID se select karna
-            const downloadLink = document.getElementById('downloadLink');
-
-            // Check karna ki file ka naam .pdf se khatm ho raha hai ya nahi (case-insensitive)
-            if (fileName.toLowerCase().endsWith('.pdf')) {
-                // Agar PDF hai, to link ka target '_blank' set kar do taaki naye tab me khule
-                downloadLink.setAttribute('target', '_blank');
-            } else {
-                // Agar PDF nahi hai, to 'download' attribute add kar do
-                // Isse browser file ko open karne ke bajaye download karega
-                downloadLink.setAttribute('download', fileName);
-            }
         });
     </script>
-    </body>
+</body>
 </html>
