@@ -99,7 +99,18 @@
             overflow: hidden;
             animation: container-glow 5s ease-in-out infinite alternate;
             border: 1px solid rgba(0, 170, 255, 0.4);
+            /* --- RESPONSIVE FIX --- */
+            width: 100%;
+            aspect-ratio: 16 / 9; /* Standard widescreen aspect ratio */
+            background-color: #000; /* Black background while video loads */
         }
+
+        /* Make sure the player fills the wrapper */
+        .player-wrapper .plyr {
+            width: 100%;
+            height: 100%;
+        }
+        
         .player-logo img {
             width: 90px;
             height: 90px;
@@ -117,7 +128,7 @@
             box-shadow: 0 0 20px var(--primary-glow);
         }
         
-        /* --- NEW Waiting Overlay --- */
+        /* Waiting Overlay */
         #waiting-overlay {
             position: absolute;
             top: 0;
@@ -196,7 +207,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* --- NEW ABOUT SECTION STYLES --- */
+        /* --- ABOUT SECTION STYLES --- */
         #about-section {
             padding: 60px 0;
             border-top: 1px solid rgba(0, 170, 255, 0.2);
@@ -275,7 +286,7 @@
             .waiting-text { font-size: 1.2rem; }
         }
         
-        /* --- Skip Button --- */
+        /* Skip Button */
         #skip-ad-btn {
             position: absolute;
             bottom: 20px;
@@ -336,14 +347,12 @@
         <div class="d-flex justify-content-center flex-nowrap gap-3 my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <button id="like-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
                 <i class="bi bi-heart-fill"></i> Like <span id="like-count" class="badge bg-light text-dark ms-1">0</span>
-       
              </button>
             <button id="comment-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
                 <i class="bi bi-chat-right-dots-fill"></i> Comment
             </button>
             <button id="timeline-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
                 <i class="bi bi-clock-history"></i> Timeline
-       
              </button>
         </div>
     
@@ -353,8 +362,7 @@
             </a>
         </div>
 
-        <div class="text-center my-4 
-            animate__animated animate__fadeInUp animate__delay-2s">
+        <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <a href="{{link}}" target="_blank" class="btn cta-button btn-lg rounded-pill shine-effect">
                 <i class="bi bi-telegram"></i> Join Telegram Channel
             </a>
@@ -362,17 +370,11 @@
 
         <div class="row justify-content-center mt-5 animate__animated animate__fadeInUp animate__delay-2s">
             <div class="col-12 col-lg-10">
-          
                   <div class="disclaimer-box p-4 rounded-4">
                     <h4 class="fw-bold text-center mb-3 glowing-text"><i class="bi bi-shield-check"></i> Disclaimer</h4>
                     <p class="text-center small mb-3">This website operates under the principle of **"Education for All."** The content provided here, including all video streams, is intended solely for **informational and educational purposes.**</p>
-                
-                    <p class="text-center small mb-3">We do not host, own, or upload any media content displayed on this platform.
-                    All media is sourced from and streamed through third-party services and platforms that are publicly available.
-                    We are not responsible for the accuracy, legality, or copyright compliance of the content from these external sources.</p>
-                    <p class="text-center small">By using our service, you acknowledge and agree that you are accessing this content at your own risk.
-                    It is the user's responsibility to ensure that their use of any content from this website complies with the laws and regulations of their jurisdiction.
-                    We strongly encourage our users to support the original content creators.</p>
+                    <p class="text-center small mb-3">We do not host, own, or upload any media content displayed on this platform. All media is sourced from and streamed through third-party services and platforms that are publicly available. We are not responsible for the accuracy, legality, or copyright compliance of the content from these external sources.</p>
+                    <p class="text-center small">By using our service, you acknowledge and agree that you are accessing this content at your own risk. It is the user's responsibility to ensure that their use of any content from this website complies with the laws and regulations of their jurisdiction. We strongly encourage our users to support the original content creators.</p>
                 </div>
             </div>
         </div>
@@ -384,43 +386,36 @@
            
             <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="About Logo" class="about-logo">
             <p class="lead mb-5">
-                Explore our other websites where all paid content is available for free.
-                Visit now!
+                Explore our other websites where all paid content is available for free. Visit now!
             </p>
 
             <div class="row g-4 justify-content-center">
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect">
                         <span class="btn-title">SkillNeast</span>
-                
                         <span class="btn-subtitle">All paid courses are free</span>
                     </a>
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect">
-         
                         <span class="btn-title">PDFNeast</span>
                         <span class="btn-subtitle">All paid book PDFs are free</span>
                     </a>
                 </div>
-                <div class="col-12 
-                    col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect">
                         <span class="btn-title">CoderNeast</span>
                         <span class="btn-subtitle">Paid coding courses are free</span>
                     </a>
-  
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect">
                         <span class="btn-title">StudyNeast</span>
-                   
                         <span class="btn-subtitle">Study batches are free</span>
                     </a>
                 </div>
                  <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect telegram-btn">
-           
                         <span class="btn-title"><i class="bi bi-telegram"></i> Join Telegram</span>
                         <span class="btn-subtitle">For updates & new content</span>
                     </a>
@@ -443,8 +438,7 @@
             <div class="modal-content animate__animated animate__zoomIn">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle"></h5>
-                    <button type="button" class="btn-close" 
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center h4 py-5" id="modalBody"></div>
             </div>
@@ -461,7 +455,6 @@
       
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- JAVASCRIPT ANIMATION TRIGGER ---
             const playerWrapper = document.querySelector('.player-wrapper');
             if(playerWrapper) {
                 setTimeout(() => {
@@ -469,64 +462,46 @@
                 }, 100);
             }
             
-            // Your web app's Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyC1m25mHpA59xBQmF34BfA1K_vY2pUSrLI",
                 authDomain: "fahad-portfolio-81c65.firebaseapp.com",
                 databaseURL: "https://fahad-portfolio-81c65-default-rtdb.firebaseio.com",
-     
                 projectId: "fahad-portfolio-81c65",
                 storageBucket: "fahad-portfolio-81c65.firebasestorage.app",
                 messagingSenderId: "510625882446",
                 appId: "1:510625882446:web:b23f76808b3dd0e79a3e1f",
                 measurementId: "G-J5S5PLWE7J"
             };
-            // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-            // ===================================================================
-            // ===== नया कोड यहाँ से शुरू होता है / NEW CODE STARTS HERE =====
-            // ===================================================================
-
+            
+            // --- PLAYER LOGIC ---
             const player = new Plyr('#player', {
                 controls: ['play-large', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen']
             });
             const introClipSrc = 'https://res.cloudinary.com/dniqp9wst/video/upload/Video_Generation_SkillNeast_Promo_nn48qr.mp4';
-            
-            // --- CODE FIX --- Using single quotes instead of backticks for safety
             const mainVideoSrc = '{{file_url}}';
-
             const skipAdBtn = document.getElementById('skip-ad-btn');
             const waitingOverlay = document.getElementById('waiting-overlay');
 
-            // Helper function to show the waiting message
             const showWaitingMessage = () => {
-                if (waitingOverlay) {
-                    waitingOverlay.classList.add('visible');
-                }
+                if (waitingOverlay) waitingOverlay.classList.add('visible');
             };
-
-            // Helper function to hide the waiting message
             const hideWaitingMessage = () => {
-                if (waitingOverlay) {
-                    waitingOverlay.classList.remove('visible');
-                }
+                if (waitingOverlay) waitingOverlay.classList.remove('visible');
             };
             
             const startMainVideo = () => {
-                showWaitingMessage(); // Show message when we initiate the video switch
+                showWaitingMessage();
                 player.source = {
                     type: 'video',
                     sources: [{ src: mainVideoSrc, type: 'video/mp4' }]
                 };
-                if (skipAdBtn) {
-                    skipAdBtn.style.display = 'none';
-                }
+                if (skipAdBtn) skipAdBtn.style.display = 'none';
                 player.play();
                 player.off('ended', startMainVideo);
             };
 
-            // Set the initial source to the intro clip
             if (mainVideoSrc) {
                 player.source = {
                     type: 'video',
@@ -536,18 +511,18 @@
 
             player.on('ready', (event) => {
                 const playerLogo = document.querySelector('.player-logo');
-                const instance = event.detail.plyr;
-                const container = instance.elements.container;
-                if (playerLogo && container) {
-                    container.appendChild(playerLogo);
-                }
+                const container = event.detail.plyr.elements.container;
+                if (playerLogo && container) container.appendChild(playerLogo);
             });
 
-            player.on('play', event => {
-                // When any video starts playing (intro or main), hide the waiting message
+            // --- HIDING TEXT FIX: Use 'playing' event ---
+            // This event fires only when the media is actually playing.
+            player.on('playing', () => {
                 hideWaitingMessage();
+            });
 
-                // Show skip button only for the intro clip
+            // This event is for showing the skip button on the intro
+            player.on('play', () => {
                 if (player.source === introClipSrc && skipAdBtn) {
                     skipAdBtn.style.display = 'block';
                 }
@@ -555,24 +530,18 @@
             
             // Show waiting message on buffering
             player.on('waiting', () => {
-                 // Only show for the main video
                 if(player.source === mainVideoSrc) {
                     showWaitingMessage();
                 }
             });
 
-            // When the intro clip ends, play the main video
             player.on('ended', startMainVideo);
 
-            // If skip button is clicked, play the main video
             if (skipAdBtn) {
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
-            // ===================================================================
-            // ===== नए कोड का अंत / END OF NEW CODE =====
-            // ===================================================================
-
+            // --- OTHER PAGE LOGIC ---
             const fileTitleElement = document.getElementById('file-title');
             const fileTitle = fileTitleElement.textContent;
             if (fileTitle.length > 70) {
@@ -580,17 +549,14 @@
             }
             
             const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
-            // UI Elements
             const likeBtn = document.getElementById('like-btn');
             const likeCountSpan = document.getElementById('like-count');
             const commentBtn = document.getElementById('comment-btn');
             const timelineBtn = document.getElementById('timeline-btn');
-            
             const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
             const modalTitle = document.getElementById('modalTitle');
             const modalBody = document.getElementById('modalBody');
 
-            // --- Firebase Like Logic ---
             const likesRef = database.ref('likes/' + videoId);
             let isLiked = localStorage.getItem(videoId + '_liked') === 'true';
             
@@ -606,12 +572,11 @@
                 isLiked = !isLiked;
                 localStorage.setItem(videoId + '_liked', isLiked);
                 likeBtn.classList.toggle('active', isLiked);
-                
                 likesRef.transaction((currentLikes) => {
                     return isLiked ? (currentLikes || 0) + 1 : (currentLikes || 1) - 1;
                 });
             });
-            // --- Modal Logic ---
+
             commentBtn.addEventListener('click', () => {
                 modalTitle.textContent = '📝 Comments Section';
                 modalBody.innerHTML = 'Our comment section is<br><strong>Coming Soon!</strong> 🔜';
@@ -622,7 +587,7 @@
                 modalBody.innerHTML = 'The timeline feature is under development.<br><strong>Coming Soon!</strong> 🚀';
                 infoModal.show();
             });
-            // --- Security ---
+
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener('keydown', e => {
                 if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
