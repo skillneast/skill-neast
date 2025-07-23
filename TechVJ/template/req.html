@@ -99,18 +99,14 @@
             overflow: hidden;
             animation: container-glow 5s ease-in-out infinite alternate;
             border: 1px solid rgba(0, 170, 255, 0.4);
-            /* --- RESPONSIVE FIX --- */
             width: 100%;
-            aspect-ratio: 16 / 9; /* Standard widescreen aspect ratio */
-            background-color: #000; /* Black background while video loads */
+            aspect-ratio: 16 / 9;
+            background-color: #000;
         }
-
-        /* Make sure the player fills the wrapper */
         .player-wrapper .plyr {
             width: 100%;
             height: 100%;
         }
-        
         .player-logo img {
             width: 90px;
             height: 90px;
@@ -151,9 +147,8 @@
             font-weight: bold;
         }
 
-
-        /* Buttons */
-        .action-button, .cta-button {
+        /* Buttons & Reactions */
+        .cta-button {
             position: relative;
             overflow: hidden;
             border: 1px solid var(--primary-glow);
@@ -161,16 +156,11 @@
             background: transparent;
             transition: all 0.3s ease;
         }
-        .action-button:hover, .cta-button:hover {
+        .cta-button:hover {
             color: #fff;
             background: var(--primary-glow);
             box-shadow: 0 0 25px var(--primary-glow);
             transform: translateY(-4px);
-        }
-        .action-button.active {
-             background: var(--primary-glow);
-             color: #fff;
-             box-shadow: 0 0 15px var(--primary-glow);
         }
         .cta-button {
             background: var(--primary-glow);
@@ -181,8 +171,6 @@
             border-color: var(--secondary-glow);
             box-shadow: 0 0 25px var(--secondary-glow);
         }
-        
-        /* Shine Effect */
         .shine-effect::after {
             content: '';
             position: absolute;
@@ -195,9 +183,42 @@
             background: rgba(255, 255, 255, 0.2);
             transition: all 0.75s ease;
         }
-        .action-button:hover .shine-effect::after, .cta-button:hover .shine-effect::after, .custom-btn:hover .shine-effect::after {
+        .cta-button:hover .shine-effect::after {
             left: 125%;
             opacity: 1;
+        }
+
+        /* Reactions Section */
+        .reactions-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem; /* Space between emojis */
+        }
+        .reaction-btn {
+            font-size: 2rem; /* Larger emoji */
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            filter: grayscale(80%); /* Make non-selected emojis gray */
+            position: relative;
+        }
+        .reaction-btn:hover {
+            transform: scale(1.2);
+            filter: grayscale(0%);
+        }
+        .reaction-btn.selected {
+            transform: scale(1.2);
+            filter: grayscale(0%);
+        }
+        .reaction-count {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #fff;
+            background: rgba(0,0,0,0.6);
+            padding: 1px 6px;
+            border-radius: 8px;
         }
 
         /* Disclaimer */
@@ -207,7 +228,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* --- ABOUT SECTION STYLES --- */
+        /* About Section */
         #about-section {
             padding: 60px 0;
             border-top: 1px solid rgba(0, 170, 255, 0.2);
@@ -267,7 +288,6 @@
             box-shadow: 0 0 25px var(--secondary-glow);
         }
 
-
         /* Modal */
         .modal-content {
             background: #1a1a1a;
@@ -281,9 +301,8 @@
         @media (max-width: 768px) {
             .file-title { font-size: 1.2rem; }
             .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
-            .action-buttons-container { gap: 0.5rem; }
-            .action-button { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
             .waiting-text { font-size: 1.2rem; }
+            .reaction-btn { font-size: 1.5rem; }
         }
         
         /* Skip Button */
@@ -298,7 +317,7 @@
             padding: 5px 15px;
             border-radius: 20px;
             cursor: pointer;
-            display: none; /* Initially hidden */
+            display: none;
         }
         #skip-ad-btn:hover {
             background-color: rgba(255, 255, 255, 0.9);
@@ -322,7 +341,6 @@
     </header>
 
     <main class="main-content container py-4">
-     
         <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
             <h1 id="file-title" class="file-title fw-bold">{{file_name}}</h1>
         </div>
@@ -330,7 +348,6 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-11">
                 <div class="player-wrapper mb-4">
-                   
                     <a href="{{link}}" target="_blank" class="player-logo">
                         <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo">
                     </a>
@@ -339,24 +356,33 @@
                     <div id="waiting-overlay">
                         <span class="waiting-text glowing-text">Waiting a sec...</span>
                     </div>
-   
                 </div>
             </div>
         </div>
-
-        <div class="d-flex justify-content-center flex-nowrap gap-3 my-4 animate__animated animate__fadeInUp animate__delay-2s">
-            <button id="like-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
-                <i class="bi bi-heart-fill"></i> Like <span id="like-count" class="badge bg-light text-dark ms-1">0</span>
-             </button>
-            <button id="comment-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
-                <i class="bi bi-chat-right-dots-fill"></i> Comment
-            </button>
-            <button id="timeline-btn" class="btn action-button shine-effect rounded-pill px-4 py-2">
-                <i class="bi bi-clock-history"></i> Timeline
-             </button>
+        
+        <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <h4 class="fw-bold">fine ⚡ is working</h4>
+            <hr style="border-color: rgba(255, 255, 255, 0.3);">
+            <div id="reactions-container" class="reactions-container mt-3">
+                <span class="reaction-btn" data-reaction="⚡">
+                    ⚡
+                    <span id="count-⚡" class="reaction-count">0</span>
+                </span>
+                <span class="reaction-btn" data-reaction="❤️">
+                    ❤️
+                    <span id="count-❤️" class="reaction-count">0</span>
+                </span>
+                <span class="reaction-btn" data-reaction="👍">
+                    👍
+                    <span id="count-👍" class="reaction-count">0</span>
+                </span>
+                <span class="reaction-btn" data-reaction="🥰">
+                    🥰
+                    <span id="count-🥰" class="reaction-count">0</span>
+                </span>
+            </div>
         </div>
-    
-        <div class="text-center my-3 animate__animated animate__fadeInUp animate__delay-2s">
+        <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <a href="{{file_url}}" download class="btn cta-button btn-lg rounded-pill shine-effect">
                 <i class="bi bi-download"></i> Download Video
             </a>
@@ -383,12 +409,10 @@
     <section id="about-section">
         <div class="container text-center">
             <h2 class="glowing-text mb-4 display-5 fw-bold">📚 Education for All ✨</h2>
-           
             <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="About Logo" class="about-logo">
             <p class="lead mb-5">
                 Explore our other websites where all paid content is available for free. Visit now!
             </p>
-
             <div class="row g-4 justify-content-center">
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="#" class="custom-btn shine-effect">
@@ -421,10 +445,8 @@
                     </a>
                 </div>
             </div>
-     
            </div>
     </section>
-
 
     <footer class="bg-dark mt-auto">
         <div class="text-center p-3 text-secondary">
@@ -433,26 +455,12 @@
         </div>
     </footer>
 
-    <div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content animate__animated animate__zoomIn">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center h4 py-5" id="modalBody"></div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <script>
-      
         document.addEventListener('DOMContentLoaded', () => {
             
             const playerWrapper = document.querySelector('.player-wrapper');
@@ -515,26 +523,15 @@
                 if (playerLogo && container) container.appendChild(playerLogo);
             });
 
-            // --- HIDING TEXT FIX: Use 'playing' event ---
-            // This event fires only when the media is actually playing.
-            player.on('playing', () => {
-                hideWaitingMessage();
-            });
-
-            // This event is for showing the skip button on the intro
+            player.on('playing', () => hideWaitingMessage());
             player.on('play', () => {
                 if (player.source === introClipSrc && skipAdBtn) {
                     skipAdBtn.style.display = 'block';
                 }
             });
-            
-            // Show waiting message on buffering
             player.on('waiting', () => {
-                if(player.source === mainVideoSrc) {
-                    showWaitingMessage();
-                }
+                if(player.source === mainVideoSrc) showWaitingMessage();
             });
-
             player.on('ended', startMainVideo);
 
             if (skipAdBtn) {
@@ -549,44 +546,65 @@
             }
             
             const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
-            const likeBtn = document.getElementById('like-btn');
-            const likeCountSpan = document.getElementById('like-count');
-            const commentBtn = document.getElementById('comment-btn');
-            const timelineBtn = document.getElementById('timeline-btn');
-            const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
 
-            const likesRef = database.ref('likes/' + videoId);
-            let isLiked = localStorage.getItem(videoId + '_liked') === 'true';
-            
-            if (isLiked) {
-                likeBtn.classList.add('active');
-            }
-            
-            likesRef.on('value', (snapshot) => {
-                const likeCount = snapshot.val() || 0;
-                likeCountSpan.textContent = likeCount;
+            // === NEW REACTION LOGIC STARTS HERE ===
+            const reactionsContainer = document.getElementById('reactions-container');
+            const reactionsRef = database.ref('reactions/' + videoId);
+            let userReaction = localStorage.getItem(videoId + '_reaction');
+
+            // Function to update the UI
+            const updateUI = (selectedReaction) => {
+                document.querySelectorAll('.reaction-btn').forEach(btn => {
+                    if (btn.dataset.reaction === selectedReaction) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+            };
+
+            // Listen for clicks on reaction buttons
+            reactionsContainer.addEventListener('click', (e) => {
+                const target = e.target.closest('.reaction-btn');
+                if (!target) return;
+
+                const newReaction = target.dataset.reaction;
+                const oldReaction = userReaction;
+
+                if (oldReaction === newReaction) { // User is deselecting their reaction
+                    userReaction = null;
+                    localStorage.removeItem(videoId + '_reaction');
+                    updateUI(null);
+                    // Decrease the count for the old reaction
+                    reactionsRef.child(oldReaction).transaction(count => (count || 1) - 1);
+                } else { // User is selecting a new reaction
+                    userReaction = newReaction;
+                    localStorage.setItem(videoId + '_reaction', newReaction);
+                    updateUI(newReaction);
+                    // Increase the count for the new reaction
+                    reactionsRef.child(newReaction).transaction(count => (count || 0) + 1);
+                    // If there was an old reaction, decrease its count
+                    if (oldReaction) {
+                        reactionsRef.child(oldReaction).transaction(count => (count || 1) - 1);
+                    }
+                }
             });
-            likeBtn.addEventListener('click', () => {
-                isLiked = !isLiked;
-                localStorage.setItem(videoId + '_liked', isLiked);
-                likeBtn.classList.toggle('active', isLiked);
-                likesRef.transaction((currentLikes) => {
-                    return isLiked ? (currentLikes || 0) + 1 : (currentLikes || 1) - 1;
+
+            // Listen for changes in the database and update counts
+            reactionsRef.on('value', (snapshot) => {
+                const counts = snapshot.val() || {};
+                document.querySelectorAll('.reaction-btn').forEach(btn => {
+                    const reaction = btn.dataset.reaction;
+                    const count = counts[reaction] || 0;
+                    document.getElementById(`count-${reaction}`).textContent = count;
                 });
             });
 
-            commentBtn.addEventListener('click', () => {
-                modalTitle.textContent = '📝 Comments Section';
-                modalBody.innerHTML = 'Our comment section is<br><strong>Coming Soon!</strong> 🔜';
-                infoModal.show();
-            });
-            timelineBtn.addEventListener('click', () => {
-                modalTitle.textContent = '⏳ Timeline Feature';
-                modalBody.innerHTML = 'The timeline feature is under development.<br><strong>Coming Soon!</strong> 🚀';
-                infoModal.show();
-            });
+            // Set initial selected state from localStorage
+            if (userReaction) {
+                updateUI(userReaction);
+            }
+            // === NEW REACTION LOGIC ENDS HERE ===
 
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener('keydown', e => {
