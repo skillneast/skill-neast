@@ -323,6 +323,23 @@
             background-color: rgba(255, 255, 255, 0.9);
             color: black;
         }
+        
+        /* --- NEW: Floating Text Style --- */
+        #floating-text {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 150; /* Higher than other player elements */
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            display: none; /* Initially hidden */
+            pointer-events: none; /* So it doesn't block clicks */
+        }
     </style>
 </head>
 
@@ -353,11 +370,18 @@
                     </a>
                     <video id="player" class="player" playsinline controls></video>
                     <div id="skip-ad-btn">Skip Ad >></div>
+                    <div id="floating-text">https://t.me/skillneast</div>
                     <div id="waiting-overlay">
                         <span class="waiting-text glowing-text">Waiting a sec...</span>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="text-center mb-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <button id="copy-link-btn" class="btn btn-sm btn-outline-light rounded-pill">
+                🔘 Copy Stream URL
+            </button>
         </div>
         
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
@@ -491,6 +515,7 @@
             const mainVideoSrc = '{{file_url}}';
             const skipAdBtn = document.getElementById('skip-ad-btn');
             const waitingOverlay = document.getElementById('waiting-overlay');
+            const floatingText = document.getElementById('floating-text'); // NEW: Get floating text element
 
             const showWaitingMessage = () => {
                 if (waitingOverlay) waitingOverlay.classList.add('visible');
@@ -506,6 +531,7 @@
                     sources: [{ src: mainVideoSrc, type: 'video/mp4' }]
                 };
                 if (skipAdBtn) skipAdBtn.style.display = 'none';
+                if (floatingText) floatingText.style.display = 'none'; // Hide text initially
                 player.play();
                 player.off('ended', startMainVideo);
             };
@@ -523,21 +549,58 @@
                 if (playerLogo && container) container.appendChild(playerLogo);
             });
 
-            player.on('playing', () => hideWaitingMessage());
+            // --- MODIFIED: Player event listeners to control floating text ---
+            player.on('playing', () => {
+                hideWaitingMessage();
+                if (player.source === mainVideoSrc && floatingText) {
+                    floatingText.style.display = 'block'; // Show text for main video
+                }
+            });
+
+            player.on('pause', () => {
+                if (floatingText) floatingText.style.display = 'none'; // Hide on pause
+            });
+
             player.on('play', () => {
                 if (player.source === introClipSrc && skipAdBtn) {
                     skipAdBtn.style.display = 'block';
                 }
             });
+            
             player.on('waiting', () => {
                 if(player.source === mainVideoSrc) showWaitingMessage();
             });
-            player.on('ended', startMainVideo);
+
+            player.on('ended', () => {
+                if (floatingText) floatingText.style.display = 'none'; // Hide when video ends
+                startMainVideo();
+            });
+
 
             if (skipAdBtn) {
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
+            // --- NEW: Copy Link Button Logic ---
+            const copyBtn = document.getElementById('copy-link-btn');
+            if(copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const videoUrl = '{{file_url}}';
+                    navigator.clipboard.writeText(videoUrl).then(() => {
+                        copyBtn.textContent = '✅ Copied!';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '🔘 Copy Stream URL';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        copyBtn.textContent = '❌ Failed to Copy';
+                        setTimeout(() => {
+                           copyBtn.innerHTML = '🔘 Copy Stream URL';
+                        }, 2000);
+                    });
+                });
+            }
+
             // --- OTHER PAGE LOGIC ---
             const fileTitleElement = document.getElementById('file-title');
             const fileTitle = fileTitleElement.textContent;
@@ -547,12 +610,11 @@
             
             const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
 
-            // === NEW REACTION LOGIC STARTS HERE ===
+            // === REACTION LOGIC STARTS HERE ===
             const reactionsContainer = document.getElementById('reactions-container');
             const reactionsRef = database.ref('reactions/' + videoId);
             let userReaction = localStorage.getItem(videoId + '_reaction');
 
-            // Function to update the UI
             const updateUI = (selectedReaction) => {
                 document.querySelectorAll('.reaction-btn').forEach(btn => {
                     if (btn.dataset.reaction === selectedReaction) {
@@ -563,7 +625,6 @@
                 });
             };
 
-            // Listen for clicks on reaction buttons
             reactionsContainer.addEventListener('click', (e) => {
                 const target = e.target.closest('.reaction-btn');
                 if (!target) return;
@@ -571,26 +632,22 @@
                 const newReaction = target.dataset.reaction;
                 const oldReaction = userReaction;
 
-                if (oldReaction === newReaction) { // User is deselecting their reaction
+                if (oldReaction === newReaction) {
                     userReaction = null;
                     localStorage.removeItem(videoId + '_reaction');
                     updateUI(null);
-                    // Decrease the count for the old reaction
                     reactionsRef.child(oldReaction).transaction(count => (count || 1) - 1);
-                } else { // User is selecting a new reaction
+                } else {
                     userReaction = newReaction;
                     localStorage.setItem(videoId + '_reaction', newReaction);
                     updateUI(newReaction);
-                    // Increase the count for the new reaction
                     reactionsRef.child(newReaction).transaction(count => (count || 0) + 1);
-                    // If there was an old reaction, decrease its count
                     if (oldReaction) {
                         reactionsRef.child(oldReaction).transaction(count => (count || 1) - 1);
                     }
                 }
             });
 
-            // Listen for changes in the database and update counts
             reactionsRef.on('value', (snapshot) => {
                 const counts = snapshot.val() || {};
                 document.querySelectorAll('.reaction-btn').forEach(btn => {
@@ -600,11 +657,10 @@
                 });
             });
 
-            // Set initial selected state from localStorage
             if (userReaction) {
                 updateUI(userReaction);
             }
-            // === NEW REACTION LOGIC ENDS HERE ===
+            // === REACTION LOGIC ENDS HERE ===
 
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener('keydown', e => {
