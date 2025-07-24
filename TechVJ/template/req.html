@@ -324,18 +324,19 @@
             color: black;
         }
         
-        /* --- NEW: Floating Text Style --- */
+        /* --- MODIFIED: Floating Text Style --- */
         #floating-text {
             position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 150; /* Higher than other player elements */
+            /* Positioned above player controls */
+            bottom: 60px; 
+            left: 15px;
+            z-index: 150;
             background-color: rgba(0, 0, 0, 0.6);
             color: white;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 5px;
-            font-size: 1rem;
+            /* Made smaller */
+            font-size: 12px; 
             font-weight: bold;
             display: none; /* Initially hidden */
             pointer-events: none; /* So it doesn't block clicks */
@@ -378,12 +379,6 @@
             </div>
         </div>
 
-        <div class="text-center mb-4 animate__animated animate__fadeInUp animate__delay-2s">
-            <button id="copy-link-btn" class="btn btn-sm btn-outline-light rounded-pill">
-                🔘 Copy Stream URL
-            </button>
-        </div>
-        
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <h4 class="fw-bold">fine ⚡ is working</h4>
             <hr style="border-color: rgba(255, 255, 255, 0.3);">
@@ -515,7 +510,7 @@
             const mainVideoSrc = '{{file_url}}';
             const skipAdBtn = document.getElementById('skip-ad-btn');
             const waitingOverlay = document.getElementById('waiting-overlay');
-            const floatingText = document.getElementById('floating-text'); // NEW: Get floating text element
+            const floatingText = document.getElementById('floating-text');
 
             const showWaitingMessage = () => {
                 if (waitingOverlay) waitingOverlay.classList.add('visible');
@@ -542,14 +537,17 @@
                     sources: [{ src: introClipSrc, type: 'video/mp4' }]
                 };
             }
-
+            
+            // --- MODIFIED: To make text work in full screen ---
             player.on('ready', (event) => {
                 const playerLogo = document.querySelector('.player-logo');
                 const container = event.detail.plyr.elements.container;
+                
+                // Append custom elements to the player container
                 if (playerLogo && container) container.appendChild(playerLogo);
+                if (floatingText && container) container.appendChild(floatingText);
             });
 
-            // --- MODIFIED: Player event listeners to control floating text ---
             player.on('playing', () => {
                 hideWaitingMessage();
                 if (player.source === mainVideoSrc && floatingText) {
@@ -581,25 +579,7 @@
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
-            // --- NEW: Copy Link Button Logic ---
-            const copyBtn = document.getElementById('copy-link-btn');
-            if(copyBtn) {
-                copyBtn.addEventListener('click', () => {
-                    const videoUrl = '{{file_url}}';
-                    navigator.clipboard.writeText(videoUrl).then(() => {
-                        copyBtn.textContent = '✅ Copied!';
-                        setTimeout(() => {
-                            copyBtn.innerHTML = '🔘 Copy Stream URL';
-                        }, 2000);
-                    }).catch(err => {
-                        console.error('Failed to copy: ', err);
-                        copyBtn.textContent = '❌ Failed to Copy';
-                        setTimeout(() => {
-                           copyBtn.innerHTML = '🔘 Copy Stream URL';
-                        }, 2000);
-                    });
-                });
-            }
+            // Copy button script has been removed
 
             // --- OTHER PAGE LOGIC ---
             const fileTitleElement = document.getElementById('file-title');
