@@ -65,9 +65,6 @@
         .glowing-text {
             animation: text-glow 4s ease-in-out infinite;
         }
-        .file-title {
-            font-size: 1.75rem;
-        }
         .nav-link-about {
             color: #f0f0f0;
             text-decoration: none;
@@ -118,16 +115,21 @@
             object-fit: contain;
         }
 
-        /* Player Logo (Re-added from original) */
+        /* Player Logo (Re-added from original) - REPOSITIONED */
         .player-logo img {
-            width: 90px; height: 90px;
+            width: 50px; height: 50px; /* Made slightly smaller */
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid rgba(255, 255, 255, 0.7);
             position: absolute;
-            top: 20px; left: 20px;
-            z-index: 12; /* Above new player controls */
+            top: 75px;  /* Positioned below the title overlay */
+            left: 25px; /* Aligned with title padding */
+            z-index: 12;
             transition: all 0.3s ease;
+            opacity: 0; /* Fade in with controls */
+        }
+        .player-wrapper.controls-visible .player-logo img {
+             opacity: 1;
         }
         .player-logo img:hover {
             transform: scale(1.15);
@@ -195,7 +197,7 @@
             opacity: 0; transition: opacity 0.4s ease-out;
         }
         .top-gradient {
-            top: 0; height: 120px;
+            top: 0; height: 150px; /* Increased height for logo */
             background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
         }
         .player-wrapper.controls-visible .overlay-gradient { opacity: 1; }
@@ -208,6 +210,7 @@
             z-index: 4;
             opacity: 0; transform: translateY(-20px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            max-width: calc(100% - 100px); /* Avoid overlapping with controls */
         }
         .player-wrapper.controls-visible .video-title-overlay {
             opacity: 1; transform: translateY(0);
@@ -379,6 +382,41 @@
         /* --- NEW PLAYER STYLES END --- */
 
 
+        /* --- NEW INFO CARD STYLE --- */
+        .info-card {
+            background: linear-gradient(145deg, rgba(30, 30, 50, 0.3), rgba(10, 10, 20, 0.3));
+            border: 1px solid rgba(137, 83, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            animation: container-glow 5s ease-in-out infinite alternate;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .info-card .video-title-main {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f0f0f0;
+            text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+        }
+        .info-card .video-meta {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            color: #ccc;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+         .info-card .video-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         /* Buttons & Reactions */
         .cta-button {
             position: relative;
@@ -524,10 +562,12 @@
 
         /* Media Queries */
         @media (max-width: 768px) {
-            .file-title { font-size: 1.2rem; }
-            .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
+            .video-title-overlay { font-size: 1rem; max-width: calc(100% - 80px); }
+            .player-logo img { width: 40px; height: 40px; top: 65px; left: 20px; }
             .reaction-btn { font-size: 1.5rem; }
             .waiting-text { font-size: 1.2rem; }
+            .info-card .video-title-main { font-size: 1.3rem; }
+            .info-card .video-meta { font-size: 0.8rem; }
         }
 
     </style>
@@ -548,9 +588,6 @@
     </header>
 
     <main class="main-content container py-4">
-        <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
-            <h1 id="file-title" class="file-title fw-bold">{{file_name}}</h1>
-        </div>
         
         <div class="row justify-content-center">
             <div class="col-12">
@@ -665,8 +702,17 @@
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>
         </div>
+
+        <div class="info-card animate__animated animate__fadeInUp animate__delay-1s">
+            <h2 class="video-title-main" id="main-video-title"></h2>
+            <div class="video-meta">
+                <span id="video-size-info"><i class="bi bi-hdd-stack"></i> Size: Fetching...</span>
+                <span><i class="bi bi-person-check"></i> Provided by: @skillneast</span>
+            </div>
+        </div>
+
 
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <h4 class="fw-bold">fine ⚡ is working</h4>
@@ -770,6 +816,10 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
+        // --- NEW ELEMENT SELECTORS ---
+        const mainVideoTitle = document.getElementById('main-video-title');
+        const videoSizeInfo = document.getElementById('video-size-info');
+
         // --- PLAYER & PAGE LOGIC ---
 
         // Element selection
@@ -860,7 +910,11 @@
             fullscreenExitIcon.classList.toggle('hide', !isFullscreen);
         };
         
-        const updateTitle = () => { videoTitleOverlay.textContent = video.dataset.title || 'Untitled Video'; };
+        const updateTitle = () => { 
+            const title = video.dataset.title || 'Untitled Video';
+            videoTitleOverlay.textContent = title; 
+            mainVideoTitle.textContent = title;
+        };
 
         const hideControls = () => {
             if (!video.paused && !settingsMenu.classList.contains('active')) {
@@ -1040,30 +1094,61 @@
         // Fullscreen
         fullscreenBtn.addEventListener('click', () => {
              if (!document.fullscreenElement) {
-                playerWrapper.requestFullscreen().catch(err => console.error(`Fullscreen failed: ${err.message}`));
+                 playerWrapper.requestFullscreen().catch(err => console.error(`Fullscreen failed: ${err.message}`));
              } else {
-                document.exitFullscreen();
+                 document.exitFullscreen();
              }
         });
         ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => document.addEventListener(event, updateFullscreenIcon));
 
 
-        // --- ORIGINAL PAGE LOGIC START ---
+        // --- ORIGINAL & MODIFIED PAGE LOGIC START ---
         
         // Initial Animation
         setTimeout(() => { playerWrapper.classList.add('animate__animated', 'animate__zoomIn'); }, 100);
+        
+        // Video Title and Size Handling
+        const originalTitle = '{{file_name}}';
+        const processedTitle = originalTitle.replace(/\+singh/gi, '').replace(/\+/g, ' ').trim();
+        video.dataset.title = processedTitle;
+        
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        async function fetchVideoSize() {
+            try {
+                const response = await fetch(mainVideoSrc, { method: 'HEAD' });
+                if (response.ok) {
+                    const size = response.headers.get('Content-Length');
+                    if (size) {
+                        videoSizeInfo.innerHTML = `<i class="bi bi-hdd-stack"></i> Size: ${formatBytes(parseInt(size, 10))}`;
+                    } else {
+                        videoSizeInfo.innerHTML = `<i class="bi bi-hdd-stack"></i> Size: Not available`;
+                    }
+                } else {
+                     videoSizeInfo.innerHTML = `<i class="bi bi-hdd-stack"></i> Size: Not available`;
+                }
+            } catch (error) {
+                console.error('Error fetching video size:', error);
+                videoSizeInfo.innerHTML = `<i class="bi bi-hdd-stack"></i> Size: Not available`;
+            }
+        }
         
         // Firebase and Reactions
         const firebaseConfig = { apiKey: "AIzaSyC1m25mHpA59xBQmF34BfA1K_vY2pUSrLI", authDomain: "fahad-portfolio-81c65.firebaseapp.com", databaseURL: "https://fahad-portfolio-81c65-default-rtdb.firebaseio.com", projectId: "fahad-portfolio-81c65", storageBucket: "fahad-portfolio-81c65.firebasestorage.app", messagingSenderId: "510625882446", appId: "1:510625882446:web:b23f76808b3dd0e79a3e1f", measurementId: "G-J5S5PLWE7J" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const fileTitleElement = document.getElementById('file-title');
-        const fileTitle = fileTitleElement.textContent;
-        if (fileTitle.length > 70) { fileTitleElement.textContent = fileTitle.slice(0, 70) + '...'; }
-        const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
+        const videoId = processedTitle.replace(/[^a-zA-Z0-9]/g, '_');
         const reactionsContainer = document.getElementById('reactions-container');
         const reactionsRef = database.ref('reactions/' + videoId);
         let userReaction = localStorage.getItem(videoId + '_reaction');
+
         const updateUI = (selectedReaction) => {
             document.querySelectorAll('.reaction-btn').forEach(btn => {
                 btn.classList.toggle('selected', btn.dataset.reaction === selectedReaction);
@@ -1108,7 +1193,8 @@
         updatePlayIcons();
         updateFullscreenIcon();
         updateTitle();
-        // --- ORIGINAL PAGE LOGIC END ---
+        fetchVideoSize(); // Fetch size on load
+        // --- ORIGINAL & MODIFIED PAGE LOGIC END ---
 
     });
     </script>
