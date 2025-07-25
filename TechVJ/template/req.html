@@ -53,6 +53,10 @@
             50% { box-shadow: 0 0 25px -5px rgba(255, 0, 222, 0.6); }
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
 
         /* Navbar */
         .navbar {
@@ -145,10 +149,19 @@
         #skip-ad-btn { position: absolute; bottom: 80px; right: 20px; z-index: 100; background-color: rgba(0, 0, 0, 0.7); color: white; border: 1px solid white; padding: 5px 15px; border-radius: 20px; cursor: pointer; display: none; }
         #skip-ad-btn:hover { background-color: rgba(255, 255, 255, 0.9); color: black; }
         #floating-text { position: absolute; bottom: 80px; left: 15px; z-index: 150; background-color: rgba(0, 0, 0, 0.6); color: white; padding: 4px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; display: none; pointer-events: none; }
+        
+        /* UPDATED: Waiting Overlay with Loader */
         #waiting-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 2, 8, 0.8); display: none; justify-content: center; align-items: center; z-index: 20; backdrop-filter: blur(5px); }
         #waiting-overlay.visible { display: flex; animation: fadeIn 0.5s ease; }
-        .waiting-text { font-size: 1.75rem; font-weight: bold; }
-        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--primary-glow);
+            animation: spin 1s linear infinite;
+        }
+
         /* Premium Info Card */
         .info-card { background: linear-gradient(145deg, rgba(15, 20, 40, 0.7), rgba(10, 15, 30, 0.8)); border: 1px solid rgba(0, 170, 255, 0.3); border-radius: 15px; padding: 20px 25px; margin-top: 20px; margin-bottom: 30px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); animation: container-glow 5s ease-in-out infinite alternate; }
         .info-card-title { font-size: 1.5rem; font-weight: bold; color: #f0f0f0; margin-bottom: 15px; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; }
@@ -166,6 +179,8 @@
         .reaction-btn:hover, .reaction-btn.selected { transform: scale(1.2); filter: grayscale(0%); }
         .reaction-count { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.6); padding: 1px 6px; border-radius: 8px; }
         .disclaimer-box { background: linear-gradient(135deg, rgba(90, 0, 255, 0.1), rgba(0, 170, 255, 0.1)); border: 1px solid rgba(137, 83, 255, 0.3); backdrop-filter: blur(5px); }
+        
+        /* UPDATED: About Section */
         #about-section { padding: 60px 0; border-top: 1px solid rgba(0, 170, 255, 0.2); background: var(--body-bg); }
         .about-logo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-glow); box-shadow: 0 0 25px rgba(0, 170, 255, 0.5); margin-bottom: 20px; }
         .custom-btn { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #f0f0f0; background: rgba(10, 10, 10, 0.7); border: 1px solid var(--primary-glow); border-radius: 12px; padding: 20px; min-height: 120px; text-align: center; transition: all 0.3s ease; overflow: hidden; }
@@ -173,13 +188,12 @@
         .custom-btn .btn-title { font-size: 1.25rem; font-weight: bold; }
         .custom-btn .btn-subtitle { font-size: 0.8rem; color: #ccc; transition: color 0.3s ease; }
         .custom-btn:hover .btn-subtitle { color: #fff; }
-        .telegram-btn { background: var(--primary-glow); color: #fff; }
-        .telegram-btn:hover { background: var(--secondary-glow); border-color: var(--secondary-glow); box-shadow: 0 0 25px var(--secondary-glow); }
+        .checkout-btn { background: var(--primary-glow); color: #fff; }
+        .checkout-btn:hover { background: var(--secondary-glow); border-color: var(--secondary-glow); box-shadow: 0 0 25px var(--secondary-glow); }
         
         /* Media Queries */
         @media (max-width: 768px) {
             .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
-            .waiting-text { font-size: 1.2rem; }
             .reaction-btn { font-size: 1.5rem; }
             .info-card-title { font-size: 1.2rem; }
             .info-card-details { justify-content: center; }
@@ -206,14 +220,13 @@
             <div class="col-12 col-lg-11">
 
                 <div class="player-wrapper mt-4 animate__animated animate__zoomIn">
-                    <a href="{{link}}" target="_blank" class="player-logo">
-                        <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo">
-                    </a>
+                    <a href="{{link}}" target="_blank" class="player-logo"><img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo"></a>
                     <div id="skip-ad-btn">Skip Ad >></div>
                     <div id="floating-text">https://t.me/skillneast</div>
                     
                     <video id="main-video" preload="metadata"></video>
-                    <div id="waiting-overlay"><span class="waiting-text glowing-text">Waiting a sec...</span></div>
+                    <div id="waiting-overlay"><div class="loader"></div></div>
+
                     <div class="overlay-gradient top-gradient"></div>
                     <div class="speed-indicator" id="speed-indicator">Playing at 2x</div>
                     <div class="mini-progress-bar-container"><div class="mini-progress-bar" id="mini-progress-bar"></div></div>
@@ -230,10 +243,7 @@
                     <div class="skip-animation" id="skip-backward-anim"><svg viewBox="0 0 24 24"><path d="M11.99 5V1l-5 4 5 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>-10s</div>
                     <div class="skip-animation" id="skip-forward-anim"><svg viewBox="0 0 24 24" style="transform: scaleX(-1);"><path d="M11.99 5V1l-5 4 5 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>+10s</div>
                     <div class="controls-container">
-                        <div class="progress-bar-container" id="progress-container">
-                            <div class="progress-tooltip" id="progress-tooltip">00:00</div>
-                            <div class="progress-bar" id="progress-bar"></div>
-                        </div>
+                        <div class="progress-bar-container" id="progress-container"><div class="progress-tooltip" id="progress-tooltip">00:00</div><div class="progress-bar" id="progress-bar"></div></div>
                         <div class="main-controls">
                             <div class="left-controls">
                                 <button class="control-btn" id="play-pause-btn" title="Play/Pause"></button>
@@ -257,20 +267,9 @@
                         </div>
                     </div>
                     <div class="settings-menu" id="settings-menu">
-                        <div id="main-settings">
-                            <ul>
-                                <li data-target-menu="speed-menu">Playback Speed <span class="setting-value" id="speed-value">Normal</span></li>
-                                <li data-target-menu="quality-menu">Quality <span class="setting-value" id="quality-value">Auto</span></li>
-                            </ul>
-                        </div>
-                        <div id="speed-menu" class="hide">
-                            <div class="menu-title" data-target-menu="main-settings"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"></path></svg><span>Playback Speed</span></div>
-                            <ul><li data-speed="0.5">0.5x</li><li data-speed="0.75">0.75x</li><li data-speed="1" class="active">Normal</li><li data-speed="1.5">1.5x</li><li data-speed="2">2x</li></ul>
-                        </div>
-                        <div id="quality-menu" class="hide">
-                             <div class="menu-title" data-target-menu="main-settings"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"></path></svg><span>Quality</span></div>
-                             <ul><li data-quality="1080">1080p <span class="setting-value">(Not Available)</span></li><li data-quality="720" class="active">720p (Auto)</li><li data-quality="480">480p <span class="setting-value">(Not Available)</span></li></ul>
-                        </div>
+                        <div id="main-settings"><ul><li data-target-menu="speed-menu">Playback Speed <span class="setting-value" id="speed-value">Normal</span></li><li data-target-menu="quality-menu">Quality <span class="setting-value" id="quality-value">Auto</span></li></ul></div>
+                        <div id="speed-menu" class="hide"><div class="menu-title" data-target-menu="main-settings"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"></path></svg><span>Playback Speed</span></div><ul><li data-speed="0.5">0.5x</li><li data-speed="0.75">0.75x</li><li data-speed="1" class="active">Normal</li><li data-speed="1.5">1.5x</li><li data-speed="2">2x</li></ul></div>
+                        <div id="quality-menu" class="hide"><div class="menu-title" data-target-menu="main-settings"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"></path></svg><span>Quality</span></div><ul><li data-quality="1080">1080p <span class="setting-value">(Not Available)</span></li><li data-quality="720" class="active">720p (Auto)</li><li data-quality="480">480p <span class="setting-value">(Not Available)</span></li></ul></div>
                     </div>
                 </div>
 
@@ -309,7 +308,22 @@
     </main>
     
     <section id="about-section">
-        </section>
+        <div class="container text-center">
+            <h2 class="glowing-text mb-4 display-5 fw-bold">📚 Education for All ✨</h2>
+            <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="About Logo" class="about-logo">
+            <p class="lead mb-5">
+                Explore our other websites where all paid content is available for free. Visit now!
+            </p>
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" class="custom-btn shine-effect checkout-btn">
+                        <span class="btn-title">All Websites</span>
+                        <span class="btn-subtitle">Click here to checkout</span>
+                    </a>
+                </div>
+            </div>
+           </div>
+    </section>
 
     <footer class="bg-dark mt-auto">
         <div class="text-center p-3 text-secondary">
@@ -385,13 +399,19 @@
         
         // --- HELPER FUNCTIONS (Combined & Adapted) ---
         const formatTime = s => { if(isNaN(s)) s=0; const m = Math.floor(s / 60); const S = Math.floor(s % 60); return `${m.toString().padStart(2, '0')}:${S.toString().padStart(2, '0')}`; };
-        const showWaitingMessage = () => { if (waitingOverlay) waitingOverlay.classList.add('visible'); };
+        
+        // UPDATED: Show waiting message function
+        const showWaitingMessage = () => { 
+            // Don't show loader if in fullscreen (horizontal on mobile)
+            if (document.fullscreenElement || document.webkitFullscreenElement) return;
+            if (waitingOverlay) waitingOverlay.classList.add('visible'); 
+        };
         const hideWaitingMessage = () => { if (waitingOverlay) waitingOverlay.classList.remove('visible'); };
         const togglePlay = () => video.paused ? video.play() : video.pause();
         const skip = (seconds) => { video.currentTime += seconds; const animElement = seconds > 0 ? skipForwardAnim : skipBackwardAnim; animElement.classList.add('active'); setTimeout(() => animElement.classList.remove('active'), 500); };
         
         const startMainVideo = () => {
-            if (!isPromoPlaying) return; // Prevent multiple calls
+            if (!isPromoPlaying) return; 
             isPromoPlaying = false;
             showWaitingMessage();
             video.src = mainVideoSrc;
@@ -411,38 +431,17 @@
         const toggleControls = () => { if (playerWrapper.classList.contains('controls-visible')) { clearTimeout(controlsTimer); playerWrapper.classList.remove('controls-visible'); } else { showControlsAndResetTimer(); } };
 
         // --- EVENT HANDLERS ---
-        // Video events
-        video.addEventListener('play', () => {
-            updatePlayIcons();
-            showControlsAndResetTimer();
-            if (isPromoPlaying && skipAdBtn) {
-                skipAdBtn.style.display = 'block';
-            }
-        });
-        video.addEventListener('playing', () => {
-            hideWaitingMessage();
-            if (!isPromoPlaying && floatingText) {
-                floatingText.style.display = 'block';
-            }
-        });
-        video.addEventListener('pause', () => {
-            updatePlayIcons();
-            showControlsAndResetTimer();
-            if (floatingText) floatingText.style.display = 'none';
-        });
-        video.addEventListener('ended', () => {
-            if (floatingText) floatingText.style.display = 'none';
-            if (isPromoPlaying) startMainVideo();
-        });
+        video.addEventListener('play', () => { updatePlayIcons(); showControlsAndResetTimer(); if (isPromoPlaying && skipAdBtn) { skipAdBtn.style.display = 'block'; } });
+        video.addEventListener('playing', () => { hideWaitingMessage(); if (!isPromoPlaying && floatingText) { floatingText.style.display = 'block'; } });
+        video.addEventListener('pause', () => { updatePlayIcons(); showControlsAndResetTimer(); if (floatingText) floatingText.style.display = 'none'; });
+        video.addEventListener('ended', () => { if (floatingText) floatingText.style.display = 'none'; if (isPromoPlaying) startMainVideo(); });
         video.addEventListener('waiting', () => { if (!isPromoPlaying) showWaitingMessage(); });
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', updateProgress);
         video.addEventListener('volumechange', updateVolumeIcon);
-        
-        // Promo/Skip Button
         if (skipAdBtn) skipAdBtn.addEventListener('click', startMainVideo);
 
-        // Player Controls
+        // --- All other player JS (tapping, scrubbing, settings) remains the same ---
         playPauseBtn.addEventListener('click', togglePlay);
         centerPlayPauseBtn.addEventListener('click', togglePlay);
         centerRewindBtn.addEventListener('click', () => skip(-10));
@@ -452,8 +451,6 @@
         pipBtn.addEventListener('click', () => { document.pictureInPictureElement ? document.exitPictureInPicture() : video.requestPictureInPicture().catch(console.error); });
         fullscreenBtn.addEventListener('click', async () => { try { if (!document.fullscreenElement && !document.webkitFullscreenElement) { if (playerWrapper.requestFullscreen) await playerWrapper.requestFullscreen(); else if (playerWrapper.webkitRequestFullscreen) await playerWrapper.webkitRequestFullscreen(); if (('ontouchstart' in window) && screen.orientation) await screen.orientation.lock('landscape'); } else { if (document.exitFullscreen) await document.exitFullscreen(); else if (document.webkitExitFullscreen) await document.webkitExitFullscreen(); if (screen.orientation) screen.orientation.unlock(); } } catch (err) { console.error(err); } });
         ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => document.addEventListener(event, updateFullscreenIcon));
-
-        // Scrubbing/Progress Bar
         const setProgress = (e) => { const rect = progressContainer.getBoundingClientRect(); const pos = (e.clientX - rect.left) / rect.width; video.currentTime = Math.max(0, Math.min(video.duration, pos * video.duration)); };
         const updateProgressTooltip = (e) => { const rect = progressContainer.getBoundingClientRect(); const pos = Math.min(Math.max(0, e.clientX - rect.left), rect.width); const percent = pos / rect.width; progressTooltip.textContent = formatTime(percent * video.duration); progressTooltip.style.left = `${pos}px`; progressTooltip.style.opacity = '1'; };
         progressContainer.addEventListener('mousemove', updateProgressTooltip);
@@ -461,19 +458,14 @@
         progressContainer.addEventListener('mousedown', e => { wasPausedBeforeScrub = video.paused; isScrubbing = true; if(!wasPausedBeforeScrub) video.pause(); setProgress(e); });
         document.addEventListener('mousemove', e => { if (isScrubbing) { e.preventDefault(); setProgress(e); updateProgressTooltip(e); showControlsAndResetTimer(); } });
         document.addEventListener('mouseup', () => { if (isScrubbing) { isScrubbing = false; if (!wasPausedBeforeScrub) video.play(); } });
-        
-        // Tap & Long Press Handlers
         function createTapHandler(singleTapAction, doubleTapAction) { let tapTimer = null; return function() { if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; if (doubleTapAction) doubleTapAction(); } else { tapTimer = setTimeout(() => { if (singleTapAction) singleTapAction(); tapTimer = null; }, 250); } }; }
         leftTapOverlay.addEventListener('click', createTapHandler(toggleControls, () => skip(-10)));
         rightTapOverlay.addEventListener('click', createTapHandler(toggleControls, () => skip(10)));
         centerTapOverlay.addEventListener('click', createTapHandler(toggleControls, togglePlay));
-
         const handleLongPressStart = (e) => { if (e.target.closest('.controls-container') || e.target.closest('.center-controls-overlay')) return; longPressTimer = setTimeout(() => { originalPlaybackRate = video.playbackRate; video.playbackRate = 2.0; speedIndicator.classList.add('active'); }, 500); };
         const handleLongPressEnd = () => { clearTimeout(longPressTimer); if (video.playbackRate === 2.0 && speedIndicator.classList.contains('active')) { video.playbackRate = originalPlaybackRate; speedIndicator.classList.remove('active'); } };
         playerWrapper.addEventListener('mousedown', handleLongPressStart); playerWrapper.addEventListener('mouseup', handleLongPressEnd); playerWrapper.addEventListener('mouseleave', handleLongPressEnd);
         playerWrapper.addEventListener('touchstart', handleLongPressStart, { passive: true }); playerWrapper.addEventListener('touchend', handleLongPressEnd);
-
-        // Settings Menu
         settingsBtn.addEventListener('click', e => { e.stopPropagation(); settingsMenu.classList.toggle('active'); playerWrapper.classList.toggle('settings-active'); showControlsAndResetTimer(); });
         document.addEventListener('click', e => { if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) { settingsMenu.classList.remove('active'); playerWrapper.classList.remove('settings-active'); } });
         document.querySelectorAll('.settings-menu [data-target-menu]').forEach(link => { link.addEventListener('click', () => { const targetMenuId = link.getAttribute('data-target-menu'); const parentMenu = link.closest('div[id]'); document.getElementById(targetMenuId).classList.remove('hide'); if (parentMenu) parentMenu.classList.add('hide'); }); });
@@ -508,10 +500,8 @@
         document.addEventListener("contextmenu", e => e.preventDefault());
         document.addEventListener('keydown', e => { if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) { e.preventDefault(); } });
         
-        // Start with promo video
         video.src = introClipSrc;
 
-        // Initialize UI states
         updatePlayIcons();
         updateVolumeIcon();
         updateProgress();
