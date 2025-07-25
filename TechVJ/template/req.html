@@ -124,6 +124,47 @@
             box-shadow: 0 0 20px var(--primary-glow);
         }
         
+        /* --- NEW: Premium Info Card --- */
+        .info-card {
+            background: linear-gradient(145deg, rgba(15, 20, 40, 0.7), rgba(10, 15, 30, 0.8));
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px 25px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: container-glow 5s ease-in-out infinite alternate;
+        }
+        .info-card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        .info-card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #ccc;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-item i {
+            color: var(--primary-glow);
+        }
+        
         /* Waiting Overlay */
         #waiting-overlay {
             position: absolute;
@@ -303,6 +344,8 @@
             .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
             .waiting-text { font-size: 1.2rem; }
             .reaction-btn { font-size: 1.5rem; }
+            .info-card-title { font-size: 1.2rem; }
+            .info-card-details { justify-content: center; }
         }
         
         /* Skip Button */
@@ -327,7 +370,6 @@
         /* --- MODIFIED: Floating Text Style --- */
         #floating-text {
             position: absolute;
-            /* Positioned above player controls */
             bottom: 60px; 
             left: 15px;
             z-index: 150;
@@ -335,7 +377,6 @@
             color: white;
             padding: 4px 8px;
             border-radius: 5px;
-            /* Made smaller */
             font-size: 12px; 
             font-weight: bold;
             display: none; /* Initially hidden */
@@ -360,7 +401,7 @@
 
     <main class="main-content container py-4">
         <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
-            <h1 id="file-title" class="file-title fw-bold">{{file_name}}</h1>
+            <h1 id="page-title" class="file-title fw-bold">{{file_name}}</h1>
         </div>
         
         <div class="row justify-content-center">
@@ -376,7 +417,21 @@
                         <span class="waiting-text glowing-text">Waiting a sec...</span>
                     </div>
                 </div>
-            </div>
+
+                <div class="info-card animate__animated animate__fadeInUp animate__delay-1s">
+                    <h2 id="card-video-title" class="info-card-title">Loading title...</h2>
+                    <div class="info-card-details">
+                        <div class="info-item">
+                            <i class="bi bi-hdd-stack-fill"></i>
+                            <span id="video-size">Loading size...</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-gem"></i>
+                            <span>Provided by: <strong>@skillneast</strong></span>
+                        </div>
+                    </div>
+                </div>
+                </div>
         </div>
 
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
@@ -543,7 +598,6 @@
                 const playerLogo = document.querySelector('.player-logo');
                 const container = event.detail.plyr.elements.container;
                 
-                // Append custom elements to the player container
                 if (playerLogo && container) container.appendChild(playerLogo);
                 if (floatingText && container) container.appendChild(floatingText);
             });
@@ -551,12 +605,12 @@
             player.on('playing', () => {
                 hideWaitingMessage();
                 if (player.source === mainVideoSrc && floatingText) {
-                    floatingText.style.display = 'block'; // Show text for main video
+                    floatingText.style.display = 'block'; 
                 }
             });
 
             player.on('pause', () => {
-                if (floatingText) floatingText.style.display = 'none'; // Hide on pause
+                if (floatingText) floatingText.style.display = 'none';
             });
 
             player.on('play', () => {
@@ -570,7 +624,7 @@
             });
 
             player.on('ended', () => {
-                if (floatingText) floatingText.style.display = 'none'; // Hide when video ends
+                if (floatingText) floatingText.style.display = 'none';
                 startMainVideo();
             });
 
@@ -579,16 +633,60 @@
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
-            // Copy button script has been removed
-
-            // --- OTHER PAGE LOGIC ---
-            const fileTitleElement = document.getElementById('file-title');
-            const fileTitle = fileTitleElement.textContent;
-            if (fileTitle.length > 70) {
-                fileTitleElement.textContent = fileTitle.slice(0, 70) + '...';
+            // === NEW SCRIPT FOR INFO CARD ===
+            const cardTitleElement = document.getElementById('card-video-title');
+            const videoSizeElement = document.getElementById('video-size');
+            const pageTitleElement = document.getElementById('page-title'); // The H1 title on top
+            
+            function getTitleFromUrl(url) {
+                try {
+                    const decodedUrl = decodeURIComponent(url);
+                    const fileName = decodedUrl.split('/').pop().split('?')[0];
+                    // Replace common separators with spaces and remove file extension
+                    return fileName.replace(/[\._-]/g, ' ').replace(/\.[^/.]+$/, "");
+                } catch (e) {
+                    console.error("Could not decode URL:", e);
+                    // Fallback to the original file name if decoding fails
+                    return "{{file_name}}";
+                }
             }
             
-            const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
+            async function fetchVideoSize(url) {
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    const size = response.headers.get('content-length');
+                    if (size) {
+                        const i = Math.floor(Math.log(size) / Math.log(1024));
+                        return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+                    }
+                    return 'N/A';
+                } catch (error) {
+                    console.error('Error fetching video size:', error);
+                    return 'N/A';
+                }
+            }
+
+            if (mainVideoSrc) {
+                const videoTitle = getTitleFromUrl(mainVideoSrc);
+                // Set the title in both the H1 and the card
+                pageTitleElement.textContent = videoTitle;
+                cardTitleElement.textContent = videoTitle;
+                
+                // Fetch and display video size
+                fetchVideoSize(mainVideoSrc).then(size => {
+                    videoSizeElement.textContent = size;
+                });
+            } else {
+                 cardTitleElement.textContent = "{{file_name}}";
+                 videoSizeElement.textContent = 'N/A';
+            }
+            
+            // To truncate long titles in the main H1 tag if needed
+            if (pageTitleElement.textContent.length > 70) {
+                 pageTitleElement.textContent = pageTitleElement.textContent.slice(0, 70) + '...';
+            }
+            
+            const videoId = pageTitleElement.textContent.replace(/[^a-zA-Z0-9]/g, '_');
 
             // === REACTION LOGIC STARTS HERE ===
             const reactionsContainer = document.getElementById('reactions-container');
