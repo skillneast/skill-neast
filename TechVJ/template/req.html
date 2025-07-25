@@ -67,9 +67,6 @@
         .glowing-text {
             animation: text-glow 4s ease-in-out infinite;
         }
-        .file-title {
-            font-size: 1.75rem;
-        }
         .nav-link-about {
             color: #f0f0f0;
             text-decoration: none;
@@ -124,7 +121,7 @@
             box-shadow: 0 0 20px var(--primary-glow);
         }
         
-        /* --- NEW: Premium Info Card --- */
+        /* Premium Info Card */
         .info-card {
             background: linear-gradient(145deg, rgba(15, 20, 40, 0.7), rgba(10, 15, 30, 0.8));
             border: 1px solid rgba(0, 170, 255, 0.3);
@@ -141,7 +138,11 @@
             font-weight: bold;
             color: #f0f0f0;
             margin-bottom: 15px;
-            line-height: 1.3;
+            line-height: 1.4;
+            /* --- MODIFIED: For better word wrapping --- */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         .info-card-details {
             display: flex;
@@ -233,13 +234,13 @@
         .reactions-container {
             display: flex;
             justify-content: center;
-            gap: 1.5rem; /* Space between emojis */
+            gap: 1.5rem;
         }
         .reaction-btn {
-            font-size: 2rem; /* Larger emoji */
+            font-size: 2rem;
             cursor: pointer;
             transition: transform 0.2s ease, filter 0.2s ease;
-            filter: grayscale(80%); /* Make non-selected emojis gray */
+            filter: grayscale(80%);
             position: relative;
         }
         .reaction-btn:hover {
@@ -340,7 +341,6 @@
 
         /* Media Queries */
         @media (max-width: 768px) {
-            .file-title { font-size: 1.2rem; }
             .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
             .waiting-text { font-size: 1.2rem; }
             .reaction-btn { font-size: 1.5rem; }
@@ -367,7 +367,6 @@
             color: black;
         }
         
-        /* --- MODIFIED: Floating Text Style --- */
         #floating-text {
             position: absolute;
             bottom: 60px; 
@@ -379,8 +378,8 @@
             border-radius: 5px;
             font-size: 12px; 
             font-weight: bold;
-            display: none; /* Initially hidden */
-            pointer-events: none; /* So it doesn't block clicks */
+            display: none;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -400,14 +399,10 @@
     </header>
 
     <main class="main-content container py-4">
-        <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
-            <h1 id="page-title" class="file-title fw-bold">{{file_name}}</h1>
-        </div>
         
         <div class="row justify-content-center">
             <div class="col-12 col-lg-11">
-                <div class="player-wrapper mb-4">
-                    <a href="{{link}}" target="_blank" class="player-logo">
+                <div class="player-wrapper mt-4"> <a href="{{link}}" target="_blank" class="player-logo">
                         <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo">
                     </a>
                     <video id="player" class="player" playsinline controls></video>
@@ -431,7 +426,7 @@
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>
         </div>
 
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
@@ -581,7 +576,7 @@
                     sources: [{ src: mainVideoSrc, type: 'video/mp4' }]
                 };
                 if (skipAdBtn) skipAdBtn.style.display = 'none';
-                if (floatingText) floatingText.style.display = 'none'; // Hide text initially
+                if (floatingText) floatingText.style.display = 'none';
                 player.play();
                 player.off('ended', startMainVideo);
             };
@@ -593,7 +588,6 @@
                 };
             }
             
-            // --- MODIFIED: To make text work in full screen ---
             player.on('ready', (event) => {
                 const playerLogo = document.querySelector('.player-logo');
                 const container = event.detail.plyr.elements.container;
@@ -633,20 +627,18 @@
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
-            // === NEW SCRIPT FOR INFO CARD ===
+            // === SCRIPT FOR INFO CARD ===
             const cardTitleElement = document.getElementById('card-video-title');
             const videoSizeElement = document.getElementById('video-size');
-            const pageTitleElement = document.getElementById('page-title'); // The H1 title on top
             
             function getTitleFromUrl(url) {
                 try {
                     const decodedUrl = decodeURIComponent(url);
                     const fileName = decodedUrl.split('/').pop().split('?')[0];
-                    // Replace common separators with spaces and remove file extension
-                    return fileName.replace(/[\._-]/g, ' ').replace(/\.[^/.]+$/, "");
+                    // --- MODIFIED: Replace +, _, - with space ---
+                    return fileName.replace(/[\._\+-]/g, ' ').replace(/\.[^/.]+$/, "");
                 } catch (e) {
                     console.error("Could not decode URL:", e);
-                    // Fallback to the original file name if decoding fails
                     return "{{file_name}}";
                 }
             }
@@ -666,29 +658,27 @@
                 }
             }
 
+            let videoId;
+
             if (mainVideoSrc) {
                 const videoTitle = getTitleFromUrl(mainVideoSrc);
-                // Set the title in both the H1 and the card
-                pageTitleElement.textContent = videoTitle;
                 cardTitleElement.textContent = videoTitle;
                 
-                // Fetch and display video size
+                // --- MODIFIED: videoId is now based on the card title ---
+                videoId = videoTitle.replace(/[^a-zA-Z0-9]/g, '_');
+                
                 fetchVideoSize(mainVideoSrc).then(size => {
                     videoSizeElement.textContent = size;
                 });
             } else {
-                 cardTitleElement.textContent = "{{file_name}}";
+                 const fallbackTitle = "{{file_name}}";
+                 cardTitleElement.textContent = fallbackTitle;
                  videoSizeElement.textContent = 'N/A';
+                 videoId = fallbackTitle.replace(/[^a-zA-Z0-9]/g, '_');
             }
             
-            // To truncate long titles in the main H1 tag if needed
-            if (pageTitleElement.textContent.length > 70) {
-                 pageTitleElement.textContent = pageTitleElement.textContent.slice(0, 70) + '...';
-            }
-            
-            const videoId = pageTitleElement.textContent.replace(/[^a-zA-Z0-9]/g, '_');
-
-            // === REACTION LOGIC STARTS HERE ===
+            // === REACTION LOGIC ===
+            // This part now correctly uses the 'videoId' defined above
             const reactionsContainer = document.getElementById('reactions-container');
             const reactionsRef = database.ref('reactions/' + videoId);
             let userReaction = localStorage.getItem(videoId + '_reaction');
@@ -738,7 +728,6 @@
             if (userReaction) {
                 updateUI(userReaction);
             }
-            // === REACTION LOGIC ENDS HERE ===
 
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener('keydown', e => {
