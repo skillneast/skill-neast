@@ -139,7 +139,6 @@
             color: #f0f0f0;
             margin-bottom: 15px;
             line-height: 1.4;
-            /* --- MODIFIED: For better word wrapping --- */
             overflow-wrap: break-word;
             word-wrap: break-word;
             word-break: break-word;
@@ -162,11 +161,23 @@
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        /* --- NEW: Style for clickable copy button --- */
+        .info-item.copy-button {
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .info-item.copy-button:hover {
+            background-color: var(--primary-glow);
+            color: #fff;
+        }
         .info-item i {
             color: var(--primary-glow);
         }
+        .info-item.copy-button:hover i {
+            color: #fff;
+        }
         
-        /* --- MODIFIED: WAITING OVERLAY AND LOADER --- */
+        /* WAITING OVERLAY AND LOADER */
         #waiting-overlay {
             position: absolute;
             top: 0;
@@ -196,8 +207,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* --- END OF MODIFICATION --- */
-
 
         /* Buttons & Reactions */
         .cta-button {
@@ -422,7 +431,7 @@
                     <div id="waiting-overlay">
                         <div class="loader"></div>
                     </div>
-                    </div>
+                </div>
 
                 <div class="info-card animate__animated animate__fadeInUp animate__delay-1s">
                     <h2 id="card-video-title" class="info-card-title">Loading title...</h2>
@@ -430,6 +439,10 @@
                         <div class="info-item">
                             <i class="bi bi-hdd-stack-fill"></i>
                             <span id="video-size">Loading size...</span>
+                        </div>
+                        <div id="copy-url-btn" class="info-item copy-button">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Copy Stream URL</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-gem"></i>
@@ -646,7 +659,6 @@
                 try {
                     const decodedUrl = decodeURIComponent(url);
                     const fileName = decodedUrl.split('/').pop().split('?')[0];
-                    // --- MODIFIED: Replace +, _, - with space ---
                     return fileName.replace(/[\._\+-]/g, ' ').replace(/\.[^/.]+$/, "");
                 } catch (e) {
                     console.error("Could not decode URL:", e);
@@ -675,7 +687,6 @@
                 const videoTitle = getTitleFromUrl(mainVideoSrc);
                 cardTitleElement.textContent = videoTitle;
                 
-                // --- MODIFIED: videoId is now based on the card title ---
                 videoId = videoTitle.replace(/[^a-zA-Z0-9]/g, '_');
                 
                 fetchVideoSize(mainVideoSrc).then(size => {
@@ -687,9 +698,34 @@
                  videoSizeElement.textContent = 'N/A';
                  videoId = fallbackTitle.replace(/[^a-zA-Z0-9]/g, '_');
             }
+
+            // --- NEW: Copy URL Button Logic ---
+            const copyUrlBtn = document.getElementById('copy-url-btn');
+            if(copyUrlBtn) {
+                copyUrlBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(mainVideoSrc).then(() => {
+                        const icon = copyUrlBtn.querySelector('i');
+                        const text = copyUrlBtn.querySelector('span');
+                        const originalText = text.textContent;
+
+                        // Provide feedback
+                        text.textContent = 'Copied!';
+                        icon.className = 'bi bi-check-lg text-success';
+
+                        // Revert back after 2 seconds
+                        setTimeout(() => {
+                           text.textContent = originalText;
+                           icon.className = 'bi bi-clipboard-check';
+                        }, 2000);
+
+                    }).catch(err => {
+                        console.error('Failed to copy URL: ', err);
+                        alert('Could not copy URL to clipboard.');
+                    });
+                });
+            }
             
             // === REACTION LOGIC ===
-            // This part now correctly uses the 'videoId' defined above
             const reactionsContainer = document.getElementById('reactions-container');
             const reactionsRef = database.ref('reactions/' + videoId);
             let userReaction = localStorage.getItem(videoId + '_reaction');
