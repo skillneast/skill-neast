@@ -67,6 +67,9 @@
         .glowing-text {
             animation: text-glow 4s ease-in-out infinite;
         }
+        .file-title {
+            font-size: 1.75rem;
+        }
         .nav-link-about {
             color: #f0f0f0;
             text-decoration: none;
@@ -121,63 +124,7 @@
             box-shadow: 0 0 20px var(--primary-glow);
         }
         
-        /* Premium Info Card */
-        .info-card {
-            background: linear-gradient(145deg, rgba(15, 20, 40, 0.7), rgba(10, 15, 30, 0.8));
-            border: 1px solid rgba(0, 170, 255, 0.3);
-            border-radius: 15px;
-            padding: 20px 25px;
-            margin-top: 20px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            animation: container-glow 5s ease-in-out infinite alternate;
-        }
-        .info-card-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #f0f0f0;
-            margin-bottom: 15px;
-            line-height: 1.4;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
-        }
-        .info-card-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
-            color: #ccc;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* --- NEW: Style for clickable copy button --- */
-        .info-item.copy-button {
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .info-item.copy-button:hover {
-            background-color: var(--primary-glow);
-            color: #fff;
-        }
-        .info-item i {
-            color: var(--primary-glow);
-        }
-        .info-item.copy-button:hover i {
-            color: #fff;
-        }
-        
-        /* WAITING OVERLAY AND LOADER */
+        /* Waiting Overlay */
         #waiting-overlay {
             position: absolute;
             top: 0;
@@ -195,17 +142,9 @@
             display: flex;
             animation: fadeIn 0.5s ease;
         }
-        .loader {
-            border: 6px solid rgba(255, 255, 255, 0.2);
-            border-top: 6px solid var(--primary-glow);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1.5s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .waiting-text {
+            font-size: 1.75rem;
+            font-weight: bold;
         }
 
         /* Buttons & Reactions */
@@ -253,13 +192,13 @@
         .reactions-container {
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 1.5rem; /* Space between emojis */
         }
         .reaction-btn {
-            font-size: 2rem;
+            font-size: 2rem; /* Larger emoji */
             cursor: pointer;
             transition: transform 0.2s ease, filter 0.2s ease;
-            filter: grayscale(80%);
+            filter: grayscale(80%); /* Make non-selected emojis gray */
             position: relative;
         }
         .reaction-btn:hover {
@@ -360,11 +299,10 @@
 
         /* Media Queries */
         @media (max-width: 768px) {
+            .file-title { font-size: 1.2rem; }
             .player-logo img { width: 65px; height: 65px; top: 15px; left: 15px; }
             .waiting-text { font-size: 1.2rem; }
             .reaction-btn { font-size: 1.5rem; }
-            .info-card-title { font-size: 1.2rem; }
-            .info-card-details { justify-content: center; }
         }
         
         /* Skip Button */
@@ -386,19 +324,21 @@
             color: black;
         }
         
+        /* --- NEW: Floating Text Style --- */
         #floating-text {
             position: absolute;
-            bottom: 60px; 
-            left: 15px;
-            z-index: 150;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 150; /* Higher than other player elements */
             background-color: rgba(0, 0, 0, 0.6);
             color: white;
-            padding: 4px 8px;
+            padding: 5px 10px;
             border-radius: 5px;
-            font-size: 12px; 
+            font-size: 1rem;
             font-weight: bold;
-            display: none;
-            pointer-events: none;
+            display: none; /* Initially hidden */
+            pointer-events: none; /* So it doesn't block clicks */
         }
     </style>
 </head>
@@ -418,41 +358,32 @@
     </header>
 
     <main class="main-content container py-4">
+        <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
+            <h1 id="file-title" class="file-title fw-bold">{{file_name}}</h1>
+        </div>
         
         <div class="row justify-content-center">
             <div class="col-12 col-lg-11">
-                <div class="player-wrapper mt-4"> <a href="{{link}}" target="_blank" class="player-logo">
+                <div class="player-wrapper mb-4">
+                    <a href="{{link}}" target="_blank" class="player-logo">
                         <img src="https://i.postimg.cc/NFPzT9dy/file-00000000fde061f7b24dbaddd2b9ac88.png" alt="Logo">
                     </a>
                     <video id="player" class="player" playsinline controls></video>
                     <div id="skip-ad-btn">Skip Ad >></div>
                     <div id="floating-text">https://t.me/skillneast</div>
-                    
                     <div id="waiting-overlay">
-                        <div class="loader"></div>
-                    </div>
-                </div>
-
-                <div class="info-card animate__animated animate__fadeInUp animate__delay-1s">
-                    <h2 id="card-video-title" class="info-card-title">Loading title...</h2>
-                    <div class="info-card-details">
-                        <div class="info-item">
-                            <i class="bi bi-hdd-stack-fill"></i>
-                            <span id="video-size">Loading size...</span>
-                        </div>
-                        <div id="copy-url-btn" class="info-item copy-button">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span>Copy Stream URL</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="bi bi-gem"></i>
-                            <span>Provided by: <strong>@skillneast</strong></span>
-                        </div>
+                        <span class="waiting-text glowing-text">Waiting a sec...</span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div class="text-center mb-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <button id="copy-link-btn" class="btn btn-sm btn-outline-light rounded-pill">
+                🔘 Copy Stream URL
+            </button>
+        </div>
+        
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <h4 class="fw-bold">fine ⚡ is working</h4>
             <hr style="border-color: rgba(255, 255, 255, 0.3);">
@@ -489,7 +420,7 @@
 
         <div class="row justify-content-center mt-5 animate__animated animate__fadeInUp animate__delay-2s">
             <div class="col-12 col-lg-10">
-                 <div class="disclaimer-box p-4 rounded-4">
+                  <div class="disclaimer-box p-4 rounded-4">
                     <h4 class="fw-bold text-center mb-3 glowing-text"><i class="bi bi-shield-check"></i> Disclaimer</h4>
                     <p class="text-center small mb-3">This website operates under the principle of **"Education for All."** The content provided here, including all video streams, is intended solely for **informational and educational purposes.**</p>
                     <p class="text-center small mb-3">We do not host, own, or upload any media content displayed on this platform. All media is sourced from and streamed through third-party services and platforms that are publicly available. We are not responsible for the accuracy, legality, or copyright compliance of the content from these external sources.</p>
@@ -584,7 +515,7 @@
             const mainVideoSrc = '{{file_url}}';
             const skipAdBtn = document.getElementById('skip-ad-btn');
             const waitingOverlay = document.getElementById('waiting-overlay');
-            const floatingText = document.getElementById('floating-text');
+            const floatingText = document.getElementById('floating-text'); // NEW: Get floating text element
 
             const showWaitingMessage = () => {
                 if (waitingOverlay) waitingOverlay.classList.add('visible');
@@ -600,7 +531,7 @@
                     sources: [{ src: mainVideoSrc, type: 'video/mp4' }]
                 };
                 if (skipAdBtn) skipAdBtn.style.display = 'none';
-                if (floatingText) floatingText.style.display = 'none';
+                if (floatingText) floatingText.style.display = 'none'; // Hide text initially
                 player.play();
                 player.off('ended', startMainVideo);
             };
@@ -611,24 +542,23 @@
                     sources: [{ src: introClipSrc, type: 'video/mp4' }]
                 };
             }
-            
+
             player.on('ready', (event) => {
                 const playerLogo = document.querySelector('.player-logo');
                 const container = event.detail.plyr.elements.container;
-                
                 if (playerLogo && container) container.appendChild(playerLogo);
-                if (floatingText && container) container.appendChild(floatingText);
             });
 
+            // --- MODIFIED: Player event listeners to control floating text ---
             player.on('playing', () => {
                 hideWaitingMessage();
                 if (player.source === mainVideoSrc && floatingText) {
-                    floatingText.style.display = 'block'; 
+                    floatingText.style.display = 'block'; // Show text for main video
                 }
             });
 
             player.on('pause', () => {
-                if (floatingText) floatingText.style.display = 'none';
+                if (floatingText) floatingText.style.display = 'none'; // Hide on pause
             });
 
             player.on('play', () => {
@@ -642,7 +572,7 @@
             });
 
             player.on('ended', () => {
-                if (floatingText) floatingText.style.display = 'none';
+                if (floatingText) floatingText.style.display = 'none'; // Hide when video ends
                 startMainVideo();
             });
 
@@ -651,81 +581,36 @@
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
             
-            // === SCRIPT FOR INFO CARD ===
-            const cardTitleElement = document.getElementById('card-video-title');
-            const videoSizeElement = document.getElementById('video-size');
-            
-            function getTitleFromUrl(url) {
-                try {
-                    const decodedUrl = decodeURIComponent(url);
-                    const fileName = decodedUrl.split('/').pop().split('?')[0];
-                    return fileName.replace(/[\._\+-]/g, ' ').replace(/\.[^/.]+$/, "");
-                } catch (e) {
-                    console.error("Could not decode URL:", e);
-                    return "{{file_name}}";
-                }
-            }
-            
-            async function fetchVideoSize(url) {
-                try {
-                    const response = await fetch(url, { method: 'HEAD' });
-                    const size = response.headers.get('content-length');
-                    if (size) {
-                        const i = Math.floor(Math.log(size) / Math.log(1024));
-                        return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-                    }
-                    return 'N/A';
-                } catch (error) {
-                    console.error('Error fetching video size:', error);
-                    return 'N/A';
-                }
-            }
-
-            let videoId;
-
-            if (mainVideoSrc) {
-                const videoTitle = getTitleFromUrl(mainVideoSrc);
-                cardTitleElement.textContent = videoTitle;
-                
-                videoId = videoTitle.replace(/[^a-zA-Z0-9]/g, '_');
-                
-                fetchVideoSize(mainVideoSrc).then(size => {
-                    videoSizeElement.textContent = size;
-                });
-            } else {
-                 const fallbackTitle = "{{file_name}}";
-                 cardTitleElement.textContent = fallbackTitle;
-                 videoSizeElement.textContent = 'N/A';
-                 videoId = fallbackTitle.replace(/[^a-zA-Z0-9]/g, '_');
-            }
-
-            // --- NEW: Copy URL Button Logic ---
-            const copyUrlBtn = document.getElementById('copy-url-btn');
-            if(copyUrlBtn) {
-                copyUrlBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(mainVideoSrc).then(() => {
-                        const icon = copyUrlBtn.querySelector('i');
-                        const text = copyUrlBtn.querySelector('span');
-                        const originalText = text.textContent;
-
-                        // Provide feedback
-                        text.textContent = 'Copied!';
-                        icon.className = 'bi bi-check-lg text-success';
-
-                        // Revert back after 2 seconds
+            // --- NEW: Copy Link Button Logic ---
+            const copyBtn = document.getElementById('copy-link-btn');
+            if(copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const videoUrl = '{{file_url}}';
+                    navigator.clipboard.writeText(videoUrl).then(() => {
+                        copyBtn.textContent = '✅ Copied!';
                         setTimeout(() => {
-                           text.textContent = originalText;
-                           icon.className = 'bi bi-clipboard-check';
+                            copyBtn.innerHTML = '🔘 Copy Stream URL';
                         }, 2000);
-
                     }).catch(err => {
-                        console.error('Failed to copy URL: ', err);
-                        alert('Could not copy URL to clipboard.');
+                        console.error('Failed to copy: ', err);
+                        copyBtn.textContent = '❌ Failed to Copy';
+                        setTimeout(() => {
+                           copyBtn.innerHTML = '🔘 Copy Stream URL';
+                        }, 2000);
                     });
                 });
             }
+
+            // --- OTHER PAGE LOGIC ---
+            const fileTitleElement = document.getElementById('file-title');
+            const fileTitle = fileTitleElement.textContent;
+            if (fileTitle.length > 70) {
+                fileTitleElement.textContent = fileTitle.slice(0, 70) + '...';
+            }
             
-            // === REACTION LOGIC ===
+            const videoId = fileTitle.replace(/[^a-zA-Z0-9]/g, '_');
+
+            // === REACTION LOGIC STARTS HERE ===
             const reactionsContainer = document.getElementById('reactions-container');
             const reactionsRef = database.ref('reactions/' + videoId);
             let userReaction = localStorage.getItem(videoId + '_reaction');
@@ -775,6 +660,7 @@
             if (userReaction) {
                 updateUI(userReaction);
             }
+            // === REACTION LOGIC ENDS HERE ===
 
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener('keydown', e => {
