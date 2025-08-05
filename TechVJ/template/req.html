@@ -467,7 +467,12 @@
                 <i class="bi bi-download"></i> Download Video
             </a>
         </div>
-
+        
+        <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <button id="copy-stream-url-btn" class="btn cta-button btn-lg rounded-pill shine-effect">
+                <i class="bi bi-clipboard"></i> Copy Stream URL
+            </button>
+        </div>
         <div class="text-center my-4 animate__animated animate__fadeInUp animate__delay-2s">
             <a href="{{link}}" target="_blank" class="btn cta-button btn-lg rounded-pill shine-effect">
                 <i class="bi bi-telegram"></i> Join Telegram Channel
@@ -637,6 +642,32 @@
             if (skipAdBtn) {
                 skipAdBtn.addEventListener('click', startMainVideo);
             }
+
+            // === SCRIPT FOR COPY STREAM URL BUTTON ===
+            // Naye 'Copy Stream URL' button ko select karna
+            const copyBtn = document.getElementById('copy-stream-url-btn');
+
+            if (copyBtn) {
+                // Button par click event listener lagana
+                copyBtn.addEventListener('click', () => {
+                    // URL ko clipboard me copy karne ki koshish
+                    navigator.clipboard.writeText(mainVideoSrc).then(() => {
+                        // Success par button ka text aur icon badalna
+                        const originalIcon = copyBtn.innerHTML;
+                        copyBtn.innerHTML = `<i class="bi bi-clipboard-check-fill"></i> Copied!`;
+                        
+                        // 2 second ke baad button ko wapas original state me lana
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalIcon;
+                        }, 2000);
+
+                    }).catch(err => {
+                        // Agar copy karne me error aaye toh console me log karna
+                        console.error('Failed to copy URL: ', err);
+                    });
+                });
+            }
+
             
             // === SCRIPT FOR INFO CARD ===
             const cardTitleElement = document.getElementById('card-video-title');
