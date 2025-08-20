@@ -15,6 +15,17 @@ from urllib.parse import quote_plus, urlencode
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 
+# Ek naya function jo direct stream URL banayega
+async def get_stream_url(client, message_id):
+    try:
+        msg = await client.get_messages(LOG_CHANNEL, message_id)
+        file_name = get_name(msg)
+        file_hash = get_hash(msg)
+        return f"https://skill-neast.onrender.com/dl/{message_id}/{quote_plus(file_name)}?hash={file_hash}"
+    except Exception as e:
+        print(f"Error generating stream URL: {e}")
+        return None
+
 async def encode(string):
     string_bytes = string.encode("ascii")
     base64_bytes = base64.urlsafe_b64encode(string_bytes)
@@ -82,11 +93,17 @@ async def stream_start(client, message):
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
     
-    # HLS player ke liye URL generate karein
+    # 1. Website player URL generate karein
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
-    # Sirf yahi URL show karein
-    response_message = f"**Video Stream Link:**\n`{encoded_url}`"
+    # 2. Direct streaming URL generate karein
+    stream_url = await get_stream_url(client, log_msg.id)
+    
+    # Naya message bana rahe hain jismein dono links hain
+    response_message = (
+        f"**Website Player URL:**\n`{encoded_url}`\n\n"
+        f"**Direct Stream URL:**\n`{stream_url}`"
+    )
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
@@ -190,13 +207,29 @@ async def quality_link(client, message):
         params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}
         url1 = f"{urlencode(params)}"
         link = await encode(url1)
+        
         encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
-        # HLS player ke liye URL generate karein
-        encoded_url = f"{LINK_URL}?Tech_VJ={link}"
-        
-        # Sirf yahi URL show karein
-        response_message = f"**Video Stream Link:**\n`{encoded_url}`"
+        # Get Direct Stream URLs for all qualities
+        first_stream_url = ""
+        second_stream_url = ""
+        third_stream_url = ""
+
+        if first_id != "0":
+            first_stream_url = await get_stream_url(client, int(first_id))
+        if second_id != "0":
+            second_stream_url = await get_stream_url(client, int(second_id))
+        if third_id != "0":
+            third_stream_url = await get_stream_url(client, int(third_id))
+            
+        # Build the response message
+        response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+        if first_stream_url:
+            response_message += f"**480p Direct URL:**\n`{first_stream_url}`\n\n"
+        if second_stream_url:
+            response_message += f"**720p Direct URL:**\n`{second_stream_url}`\n\n"
+        if third_stream_url:
+            response_message += f"**1080p Direct URL:**\n`{third_stream_url}`\n\n"
         
         rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
         return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
@@ -207,11 +240,28 @@ async def quality_link(client, message):
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
     
-    # HLS player ke liye URL generate karein
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
-    # Sirf yahi URL show karein
-    response_message = f"**Video Stream Link:**\n`{encoded_url}`"
+    # Get Direct Stream URLs for all qualities
+    first_stream_url = ""
+    second_stream_url = ""
+    third_stream_url = ""
+
+    if first_id != "0":
+        first_stream_url = await get_stream_url(client, int(first_id))
+    if second_id != "0":
+        second_stream_url = await get_stream_url(client, int(second_id))
+    if third_id != "0":
+        third_stream_url = await get_stream_url(client, int(third_id))
+        
+    # Build the response message
+    response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+    if first_stream_url:
+        response_message += f"**480p Direct URL:**\n`{first_stream_url}`\n\n"
+    if second_stream_url:
+        response_message += f"**720p Direct URL:**\n`{second_stream_url}`\n\n"
+    if third_stream_url:
+        response_message += f"**1080p Direct URL:**\n`{third_stream_url}`\n\n"
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
