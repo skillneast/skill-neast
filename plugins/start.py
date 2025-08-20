@@ -93,16 +93,20 @@ async def stream_start(client, message):
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
     
-    # 1. Website player URL generate karein
+    # Website player URL generate karein
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
-    # 2. Direct streaming URL generate karein
+    # Direct streaming URL generate karein
     stream_url = await get_stream_url(client, log_msg.id)
     
-    # Naya message bana rahe hain jismein dono links hain
+    # Video ka title nikal rahe hain
+    video_title = get_name(log_msg)
+    
+    # Naya message bana rahe hain jismein sab kuch hai
     response_message = (
-        f"**Website Player URL:**\n`{encoded_url}`\n\n"
-        f"**Direct Stream URL:**\n`{stream_url}`"
+        f"**🎥 Video:** `{video_title}`\n\n"
+        f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
+        f"**🔗 Direct Stream URL:**\n`{stream_url}`"
     )
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
@@ -211,25 +215,22 @@ async def quality_link(client, message):
         encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
         # Get Direct Stream URLs for all qualities
-        first_stream_url = ""
-        second_stream_url = ""
-        third_stream_url = ""
-
-        if first_id != "0":
-            first_stream_url = await get_stream_url(client, int(first_id))
-        if second_id != "0":
-            second_stream_url = await get_stream_url(client, int(second_id))
-        if third_id != "0":
-            third_stream_url = await get_stream_url(client, int(third_id))
-            
+        first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""
+        second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""
+        third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""
+        
+        # Get video title from the first uploaded file
+        video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))
+        
         # Build the response message
-        response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+        response_message = f"**🎥 Video:** `{video_title}`\n\n"
+        response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
         if first_stream_url:
-            response_message += f"**480p Direct URL:**\n`{first_stream_url}`\n\n"
+            response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"
         if second_stream_url:
-            response_message += f"**720p Direct URL:**\n`{second_stream_url}`\n\n"
+            response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"
         if third_stream_url:
-            response_message += f"**1080p Direct URL:**\n`{third_stream_url}`\n\n"
+            response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"
         
         rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
         return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
@@ -243,25 +244,22 @@ async def quality_link(client, message):
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
     # Get Direct Stream URLs for all qualities
-    first_stream_url = ""
-    second_stream_url = ""
-    third_stream_url = ""
-
-    if first_id != "0":
-        first_stream_url = await get_stream_url(client, int(first_id))
-    if second_id != "0":
-        second_stream_url = await get_stream_url(client, int(second_id))
-    if third_id != "0":
-        third_stream_url = await get_stream_url(client, int(third_id))
+    first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""
+    second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""
+    third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""
+    
+    # Get video title from the first uploaded file
+    video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))
         
     # Build the response message
-    response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+    response_message = f"**🎥 Video:** `{video_title}`\n\n"
+    response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
     if first_stream_url:
-        response_message += f"**480p Direct URL:**\n`{first_stream_url}`\n\n"
+        response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"
     if second_stream_url:
-        response_message += f"**720p Direct URL:**\n`{second_stream_url}`\n\n"
+        response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"
     if third_stream_url:
-        response_message += f"**1080p Direct URL:**\n`{third_stream_url}`\n\n"
+        response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
