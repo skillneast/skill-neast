@@ -1,3 +1,7 @@
+# Don't Remove Credit @VJ_Botz
+# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
+# Ask Doubt on telegram @KingVJ01
+
 import random
 import requests
 import humanize
@@ -20,7 +24,7 @@ async def encode(string):
 async def decode(base64_string):
     base64_string = base64_string.strip("=") # links generated before this commit will be having = sign, hence striping them to handle padding errors.
     base64_bytes = (base64_string + "=" * (-len(base64_string) % 4)).encode("ascii")
-    string_bytes = base64.urlsafe_b64decode(base64_bytes) 
+    string_bytes = base64.urlsafe_b64decode(base64_bytes)  
     string = string_bytes.decode("ascii")
     return string
 
@@ -77,9 +81,21 @@ async def stream_start(client, message):
     params = {'u': user_id, 'w': str(log_msg.id), 's': str(0), 't': str(0)}
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
+    
+    # Direct streaming URL nikal rahe hain
+    stream_url = log_msg.link
+    
+    # Website player URL generate kar rahe hain
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
+    
+    # Naya message bana rahe hain jismein dono links hain
+    response_message = (
+        f"**Website Player URL:**\n`{encoded_url}`\n\n"
+        f"**Stream URL:**\n`{stream_url}`"
+    )
+    
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
-    await message.reply_text(text=f"<code>{encoded_url}</code>", reply_markup=rm)
+    await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
 
 @Client.on_message(filters.private & filters.command("quality"))
 async def quality_link(client, message):
@@ -181,8 +197,35 @@ async def quality_link(client, message):
         url1 = f"{urlencode(params)}"
         link = await encode(url1)
         encoded_url = f"{LINK_URL}?Tech_VJ={link}"
+        
+        # Get Streamable URLs for all qualities
+        first_stream_url = ""
+        second_stream_url = ""
+        third_stream_url = ""
+
+        if first_id != "0":
+            f_msg = await client.get_messages(LOG_CHANNEL, int(first_id))
+            first_stream_url = f_msg.link
+        
+        if second_id != "0":
+            s_msg = await client.get_messages(LOG_CHANNEL, int(second_id))
+            second_stream_url = s_msg.link
+        
+        if third_id != "0":
+            t_msg = await client.get_messages(LOG_CHANNEL, int(third_id))
+            third_stream_url = t_msg.link
+            
+        # Build the message
+        response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+        if first_stream_url:
+            response_message += f"**480p Stream URL:**\n`{first_stream_url}`\n\n"
+        if second_stream_url:
+            response_message += f"**720p Stream URL:**\n`{second_stream_url}`\n\n"
+        if third_stream_url:
+            response_message += f"**1080p Stream URL:**\n`{third_stream_url}`\n\n"
+        
         rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
-        return await message.reply_text(text=f"<code>{encoded_url}</code>", reply_markup=rm)
+        return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")
 
@@ -190,8 +233,35 @@ async def quality_link(client, message):
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
+
+    # Get Streamable URLs for all qualities
+    first_stream_url = ""
+    second_stream_url = ""
+    third_stream_url = ""
+
+    if first_id != "0":
+        f_msg = await client.get_messages(LOG_CHANNEL, int(first_id))
+        first_stream_url = f_msg.link
+    
+    if second_id != "0":
+        s_msg = await client.get_messages(LOG_CHANNEL, int(second_id))
+        second_stream_url = s_msg.link
+    
+    if third_id != "0":
+        t_msg = await client.get_messages(LOG_CHANNEL, int(third_id))
+        third_stream_url = t_msg.link
+        
+    # Build the message
+    response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
+    if first_stream_url:
+        response_message += f"**480p Stream URL:**\n`{first_stream_url}`\n\n"
+    if second_stream_url:
+        response_message += f"**720p Stream URL:**\n`{second_stream_url}`\n\n"
+    if third_stream_url:
+        response_message += f"**1080p Stream URL:**\n`{third_stream_url}`\n\n"
+    
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
-    await message.reply_text(text=f"<code>{encoded_url}</code>", reply_markup=rm)
+    await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
 
 @Client.on_message(filters.private & filters.text & ~filters.command(["account", "withdraw", "notify", "quality", "start", "update"]))
 async def link_start(client, message):
@@ -228,7 +298,7 @@ async def show_account(client, message):
         formatted_balance = f"{balance:.2f}"  # Format to 2 decimal places
         response = f"<b>Your Api Key :- <code>{message.from_user.id}</code>\n\nVideo Plays :- {link_clicks} ( Delay To Show Data )\n\nBalance :- ${formatted_balance}</b>"
     else:
-        response = f"<b>Your Api Key :- <code>{message.from_user.id}</code>\nVideo Plays :- 0 ( Delay To Show Data )\nBalance :- $0</b>" 
+        response = f"<b>Your Api Key :- <code>{message.from_user.id}</code>\nVideo Plays :- 0 ( Delay To Show Data )\nBalance :- $0</b>"  
     await message.reply(response)
 
 @Client.on_message(filters.private & filters.command("withdraw"))
@@ -308,4 +378,3 @@ async def show_notify(client, message):
                 record_withdraw(user_id.text, False)
                 await client.send_message(user_id.text, f"Your Payment Cancelled - {reason.text}")
     await message.reply("Successfully Message Send.")
-    
