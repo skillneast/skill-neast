@@ -82,17 +82,11 @@ async def stream_start(client, message):
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
     
-    # Direct streaming URL nikal rahe hain
-    stream_url = log_msg.link
-    
-    # Website player URL generate kar rahe hain
+    # HLS player ke liye URL generate karein
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
-    # Naya message bana rahe hain jismein dono links hain
-    response_message = (
-        f"**Website Player URL:**\n`{encoded_url}`\n\n"
-        f"**Stream URL:**\n`{stream_url}`"
-    )
+    # Sirf yahi URL show karein
+    response_message = f"**Video Stream Link:**\n`{encoded_url}`"
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
@@ -198,31 +192,11 @@ async def quality_link(client, message):
         link = await encode(url1)
         encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
-        # Get Streamable URLs for all qualities
-        first_stream_url = ""
-        second_stream_url = ""
-        third_stream_url = ""
-
-        if first_id != "0":
-            f_msg = await client.get_messages(LOG_CHANNEL, int(first_id))
-            first_stream_url = f_msg.link
+        # HLS player ke liye URL generate karein
+        encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
-        if second_id != "0":
-            s_msg = await client.get_messages(LOG_CHANNEL, int(second_id))
-            second_stream_url = s_msg.link
-        
-        if third_id != "0":
-            t_msg = await client.get_messages(LOG_CHANNEL, int(third_id))
-            third_stream_url = t_msg.link
-            
-        # Build the message
-        response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
-        if first_stream_url:
-            response_message += f"**480p Stream URL:**\n`{first_stream_url}`\n\n"
-        if second_stream_url:
-            response_message += f"**720p Stream URL:**\n`{second_stream_url}`\n\n"
-        if third_stream_url:
-            response_message += f"**1080p Stream URL:**\n`{third_stream_url}`\n\n"
+        # Sirf yahi URL show karein
+        response_message = f"**Video Stream Link:**\n`{encoded_url}`"
         
         rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
         return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
@@ -232,33 +206,12 @@ async def quality_link(client, message):
     params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}
     url1 = f"{urlencode(params)}"
     link = await encode(url1)
+    
+    # HLS player ke liye URL generate karein
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
-
-    # Get Streamable URLs for all qualities
-    first_stream_url = ""
-    second_stream_url = ""
-    third_stream_url = ""
-
-    if first_id != "0":
-        f_msg = await client.get_messages(LOG_CHANNEL, int(first_id))
-        first_stream_url = f_msg.link
     
-    if second_id != "0":
-        s_msg = await client.get_messages(LOG_CHANNEL, int(second_id))
-        second_stream_url = s_msg.link
-    
-    if third_id != "0":
-        t_msg = await client.get_messages(LOG_CHANNEL, int(third_id))
-        third_stream_url = t_msg.link
-        
-    # Build the message
-    response_message = f"**Website Player URL:**\n`{encoded_url}`\n\n"
-    if first_stream_url:
-        response_message += f"**480p Stream URL:**\n`{first_stream_url}`\n\n"
-    if second_stream_url:
-        response_message += f"**720p Stream URL:**\n`{second_stream_url}`\n\n"
-    if third_stream_url:
-        response_message += f"**1080p Stream URL:**\n`{third_stream_url}`\n\n"
+    # Sirf yahi URL show karein
+    response_message = f"**Video Stream Link:**\n`{encoded_url}`"
     
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
