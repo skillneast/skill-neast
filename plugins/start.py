@@ -96,32 +96,22 @@ async def universal_handler(client, message):
     file_name = get_name(log_msg)
 
     # Check for video file types
-    if file_type == 'video' or (file_type == 'document' and file.mime_type.startswith('video/')):
-        if file_name.endswith('.ts'):
-            # Handling for .ts files (streaming link)
-            params = {'u': message.from_user.id, 'w': str(log_msg.id), 's': str(0), 't': str(0)}
-            url1 = f"{urlencode(params)}"
-            link = await encode(url1)
-            encoded_url = f"{LINK_URL}?Tech_VJ={link}"
-            
-            response_message = (
-                f"**🎥 Video:** `{file_name}`\n\n"
-                f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
-                f"**🔗 Direct Stream URL:**\n`{await get_stream_url(client, log_msg.id)}`"
-            )
-            rm = InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
-            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+    if file_type == 'video' or (file_type == 'document' and file.mime_type and file.mime_type.startswith('video/')):
+        # Video file hai, to dono URLs (website aur direct) denge
+        params = {'u': message.from_user.id, 'w': str(log_msg.id), 's': str(0), 't': str(0)}
+        url1 = f"{urlencode(params)}"
+        link = await encode(url1)
+        encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
-        else:
-            # Handling for other video files (direct MP4 link)
-            stream_url = await get_stream_url(client, log_msg.id)
-            
-            response_message = (
-                f"**🎥 Video:** `{file_name}`\n\n"
-                f"**🔗 Direct Stream URL:**\n`{stream_url}`"
-            )
-            rm = InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=stream_url)]])
-            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+        direct_stream_url = await get_stream_url(client, log_msg.id)
+        
+        response_message = (
+            f"**🎥 Video:** `{file_name}`\n\n"
+            f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
+            f"**🔗 Direct Stream URL:**\n`{direct_stream_url}`"
+        )
+        rm = InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
+        await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
 
     # Handling for other file types (direct download link)
     else:
