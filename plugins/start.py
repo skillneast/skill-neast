@@ -22,6 +22,11 @@ async def get_stream_url(client, message_id):
         msg = await client.get_messages(LOG_CHANNEL, message_id)
         file_name = get_name(msg)
         file_hash = get_hash(msg)
+        
+        # Safety check for file_name
+        if not file_name:
+            return None
+        
         return f"https://skill-neast.onrender.com/dl/{message_id}/{quote_plus(file_name)}?hash={file_hash}"
     except Exception as e:
         print(f"Error generating stream URL: {e}")
@@ -33,8 +38,6 @@ async def encode(string):
     base64_string = (base64_bytes.decode("ascii")).strip("=")
     return base64_string
 
-# ----------------- FIX YAHAN HAI (FIX 1) -----------------
-# Is function ko crash hone se bachane ke liye try-except block lagaya gaya hai.
 async def decode(base64_string):
     try:
         base64_string = base64_string.strip("=")
@@ -43,9 +46,7 @@ async def decode(base64_string):
         string = string_bytes.decode("ascii")
         return string
     except (binascii.Error, TypeError):
-        # Agar link galat hai aur decode nahi ho sakta, to None return karo
         return None
-# ----------------- FIX END -----------------
 
 
 @Client.on_message(filters.command("start") & filters.private)
@@ -92,57 +93,72 @@ async def update(client, message):
             return await message.reply("Wrong Input Start Your Process Again By Hitting /update")
         return await message.reply("<b>Update Successfully.</b>")
 
+# ----------------- FIX YAHAN KIYA GAYA HAI -----------------
 @Client.on_message(filters.private & (filters.document | filters.video | filters.photo | filters.audio))
 async def universal_handler(client, message):
     if not message.media:
         return await message.reply("Please send a file (video, document, audio, etc.).")
 
-    file = getattr(message, message.media.value)  
-    file_type = message.media.value  
-    fileid = file.file_id  
+    file = getattr(message, message.media.value)
+    file_type = message.media.value
+    fileid = file.file_id
     
-    log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-    file_name = get_name(log_msg)  
-    
-    is_video = file_type == 'video' or (file_type == 'document' and file.mime_type and file.mime_type.startswith('video/'))  
-    
-    if is_video:  
-        is_ts_file = file_name.lower().endswith('.ts')  
-        
-        if is_ts_file:  
-            direct_link = await get_stream_url(client, log_msg.id)  
-            
-            response_message = (  
-                f"**🎥 Video:** `{file_name}`\n\n"  
-                f"**⬇️ Direct Download Link:**\n`{direct_link}`"  
-            )  
-            rm = InlineKeyboardMarkup([[InlineKeyboardButton("⬇️ Download Now", url=direct_link)]])  
-            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)  
-            
-        else:  
-            params = {'u': message.from_user.id, 'w': str(log_msg.id), 's': str(0), 't': str(0)}  
-            url1 = f"{urlencode(params)}"  
-            link = await encode(url1)  
-            encoded_url = f"{LINK_URL}?Tech_VJ={link}"  
-            
-            direct_stream_url = await get_stream_url(client, log_msg.id)  
-            
-            response_message = (  
-                f"**🎥 Video:** `{file_name}`\n\n"  
-                f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"  
-                f"**🔗 Direct Stream URL:**\n`{direct_stream_url}`"  
-            )  
-            rm = InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])  
-            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)  
+    log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+    file_name = get_name(log_msg)
 
-    else:  
-        direct_link = await get_stream_url(client, log_msg.id)  
-        response_message = (  
-            f"**📄 File:** `{file_name}`\n\n"  
-            f"**⬇️ Direct Download Link:**\n`{direct_link}`"  
-        )  
-        rm = InlineKeyboardMarkup([[InlineKeyboardButton("⬇️ Download Now", url=direct_link)]])  
+    # FIX: Yahan check kiya ja raha hai ki file_name None to nahi hai
+    if not file_name:
+        return await message.reply("Sorry, I couldn't get the name of this file. Please try sending it again or as a document.")
+
+    is_video = file_type == 'video' or (file_type == 'document' and file.mime_type and file.mime_type.startswith('video/'))
+    
+    if is_video:
+        # Ab ye line safe hai kyunki humne upar check kar liya hai
+        is_ts_file = file_name.lower().endswith('.ts')
+        
+        if is_ts_file:
+            direct_link = await get_stream_url(client, log_msg.id)
+            if not direct_link:
+                return await message.reply("Error generating stream link for this file.")
+            
+            response_message = (
+                f"**🎥 Video:** `{file_name}`\n\n"
+                f"**⬇️ Direct Download Link:**\n`{direct_link}`"
+            )
+            rm = InlineKeyboardMarkup([[InlineKeyboardButton("⬇️ Download Now", url=direct_link)]])
+            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+            
+        else:
+            params = {'u': message.from_user.id, 'w': str(log_msg.id), 's': str(0), 't': str(0)}
+            url1 = f"{urlencode(params)}"
+            link = await encode(url1)
+            encoded_url = f"{LINK_URL}?Tech_VJ={link}"
+            
+            direct_stream_url = await get_stream_url(client, log_msg.id)
+            if not direct_stream_url:
+                direct_stream_url = "Could not generate direct stream URL."
+            
+            response_message = (
+                f"**🎥 Video:** `{file_name}`\n\n"
+                f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
+                f"**🔗 Direct Stream URL:**\n`{direct_stream_url}`"
+            )
+            rm = InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
+            await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+
+    else:
+        direct_link = await get_stream_url(client, log_msg.id)
+        if not direct_link:
+            return await message.reply("Error generating direct download link for this file.")
+            
+        response_message = (
+            f"**📄 File:** `{file_name}`\n\n"
+            f"**⬇️ Direct Download Link:**\n`{direct_link}`"
+        )
+        rm = InlineKeyboardMarkup([[InlineKeyboardButton("⬇️ Download Now", url=direct_link)]])
         await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+# ----------------- FIX END -----------------
+
 
 @Client.on_message(filters.private & filters.command("quality"))
 async def quality_link(client, message):
@@ -180,118 +196,116 @@ async def quality_link(client, message):
     else:
         return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")
 
-    second = await client.ask(message.from_user.id, "<b>Now Send Me Your **Another** Quality In Which You Upload File. Only Below These Qualities Are Available Only.\n\n1. If your file quality is less than or equal to 480p then send <code>480</code>\n2. If your file quality is greater than 480p and less than or equal to 720p then send <code>720</code>\n3. If your file quality is greater than 720p then send <code>1080</code>\n\nNote Don not use one quality 2 or more time.</b>")  
-    if second.text != first.text and second.text == "480":  
-        f_id = await client.ask(message.from_user.id, "Now Send Me Your 480p Quality File.")  
-        if f_id.video or f_id.document:  
-            file = getattr(f_id, f_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            first_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    elif second.text != first.text and second.text == "720":  
-        s_id = await client.ask(message.from_user.id, "Now Send Me Your 720p Quality File.")  
-        if s_id.video or s_id.document:  
-            file = getattr(s_id, s_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            second_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    elif second.text != first.text and second.text == "1080":  
-        t_id = await client.ask(message.from_user.id, "Now Send Me Your 1080p Quality File.")  
-        if t_id.video or t_id.document:  
-            file = getattr(t_id, t_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            third_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    else:  
-        return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")  
+    second = await client.ask(message.from_user.id, "<b>Now Send Me Your **Another** Quality In Which You Upload File. Only Below These Qualities Are Available Only.\n\n1. If your file quality is less than or equal to 480p then send <code>480</code>\n2. If your file quality is greater than 480p and less than or equal to 720p then send <code>720</code>\n3. If your file quality is greater than 720p then send <code>1080</code>\n\nNote Don not use one quality 2 or more time.</b>")
+    if second.text != first.text and second.text == "480":
+        f_id = await client.ask(message.from_user.id, "Now Send Me Your 480p Quality File.")
+        if f_id.video or f_id.document:
+            file = getattr(f_id, f_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            first_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    elif second.text != first.text and second.text == "720":
+        s_id = await client.ask(message.from_user.id, "Now Send Me Your 720p Quality File.")
+        if s_id.video or s_id.document:
+            file = getattr(s_id, s_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            second_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    elif second.text != first.text and second.text == "1080":
+        t_id = await client.ask(message.from_user.id, "Now Send Me Your 1080p Quality File.")
+        if t_id.video or t_id.document:
+            file = getattr(t_id, t_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            third_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    else:
+        return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")
         
-    third = await client.ask(message.from_user.id, "<b>Now Send Me Your **Another** Quality In Which You Upload File. Only Below These Qualities Are Available Only.\n\n1. If your file quality is less than or equal to 480p then send <code>480</code>\n2. If your file quality is greater than 480p and less than or equal to 720p then send <code>720</code>\n3. If your file quality is greater than 720p then send <code>1080</code>\n\nNote Don not use one quality 2 or more time.\n\nIf you want only 2 quality option then use <code>/getlink</code> command for stream link.</b>")  
-    if third.text != second.text and third.text != first.text and third.text == "480":  
-        f_id = await client.ask(message.from_user.id, "Now Send Me Your 480p Quality File.")  
-        if f_id.video or f_id.document:  
-            file = getattr(f_id, f_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            first_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    elif third.text != second.text and third.text != first.text and third.text == "720":  
-        s_id = await client.ask(message.from_user.id, "Now Send Me Your 720p Quality File.")  
-        if s_id.video or s_id.document:  
-            file = getattr(s_id, s_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            second_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    elif third.text != second.text and third.text != first.text and third.text == "1080":  
-        t_id = await client.ask(message.from_user.id, "Now Send Me Your 1080p Quality File.")  
-        if t_id.video or t_id.document:  
-            file = getattr(t_id, t_id.media.value)  
-            fileid = file.file_id  
-            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)  
-            third_id = str(first_msg.id)  
-        else:  
-            return await message.reply("Wrong Input, Start Process Again By /quality")  
-    elif third.text == "/getlink":  
-        params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}  
-        url1 = f"{urlencode(params)}"  
-        link = await encode(url1)  
+    third = await client.ask(message.from_user.id, "<b>Now Send Me Your **Another** Quality In Which You Upload File. Only Below These Qualities Are Available Only.\n\n1. If your file quality is less than or equal to 480p then send <code>480</code>\n2. If your file quality is greater than 480p and less than or equal to 720p then send <code>720</code>\n3. If your file quality is greater than 720p then send <code>1080</code>\n\nNote Don not use one quality 2 or more time.\n\nIf you want only 2 quality option then use <code>/getlink</code> command for stream link.</b>")
+    if third.text != second.text and third.text != first.text and third.text == "480":
+        f_id = await client.ask(message.from_user.id, "Now Send Me Your 480p Quality File.")
+        if f_id.video or f_id.document:
+            file = getattr(f_id, f_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            first_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    elif third.text != second.text and third.text != first.text and third.text == "720":
+        s_id = await client.ask(message.from_user.id, "Now Send Me Your 720p Quality File.")
+        if s_id.video or s_id.document:
+            file = getattr(s_id, s_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            second_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    elif third.text != second.text and third.text != first.text and third.text == "1080":
+        t_id = await client.ask(message.from_user.id, "Now Send Me Your 1080p Quality File.")
+        if t_id.video or t_id.document:
+            file = getattr(t_id, t_id.media.value)
+            fileid = file.file_id
+            first_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
+            third_id = str(first_msg.id)
+        else:
+            return await message.reply("Wrong Input, Start Process Again By /quality")
+    elif third.text == "/getlink":
+        params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}
+        url1 = f"{urlencode(params)}"
+        link = await encode(url1)
         
-        encoded_url = f"{LINK_URL}?Tech_VJ={link}"  
+        encoded_url = f"{LINK_URL}?Tech_VJ={link}"
         
-        first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""  
-        second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""  
-        third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""  
+        first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""
+        second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""
+        third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""
         
-        video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))  
+        video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))
         
-        response_message = f"**🎥 Video:** `{video_title}`\n\n"  
-        response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"  
-        if first_stream_url:  
-            response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"  
-        if second_stream_url:  
-            response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"  
-        if third_stream_url:  
-            response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"  
+        response_message = f"**🎥 Video:** `{video_title}`\n\n"
+        response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
+        if first_stream_url:
+            response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"
+        if second_stream_url:
+            response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"
+        if third_stream_url:
+            response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"
         
-        rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])  
-        return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)  
-    else:  
-        return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")  
+        rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
+        return await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
+    else:
+        return await message.reply("Choose Quality From Above Three Quality Only. Send /quality commamd again to start creating link.")
 
-    params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}  
-    url1 = f"{urlencode(params)}"  
-    link = await encode(url1)  
+    params = {'u': message.from_user.id, 'w': first_id, 's': second_id, 't': third_id}
+    url1 = f"{urlencode(params)}"
+    link = await encode(url1)
     
-    encoded_url = f"{LINK_URL}?Tech_VJ={link}"  
+    encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     
-    first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""  
-    second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""  
-    third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""  
+    first_stream_url = await get_stream_url(client, int(first_id)) if first_id != "0" else ""
+    second_stream_url = await get_stream_url(client, int(second_id)) if second_id != "0" else ""
+    third_stream_url = await get_stream_url(client, int(third_id)) if third_id != "0" else ""
     
-    video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))  
+    video_title = get_name(await client.get_messages(LOG_CHANNEL, int(first_id)))
         
-    response_message = f"**🎥 Video:** `{video_title}`\n\n"  
-    response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"  
-    if first_stream_url:  
-        response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"  
-    if second_stream_url:  
-        response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"  
-    if third_stream_url:  
-        response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"  
+    response_message = f"**🎥 Video:** `{video_title}`\n\n"
+    response_message += f"**🌐 Website Player URL:**\n`{encoded_url}`\n\n"
+    if first_stream_url:
+        response_message += f"**🔗 480p Direct URL:**\n`{first_stream_url}`\n\n"
+    if second_stream_url:
+        response_message += f"**🔗 720p Direct URL:**\n`{second_stream_url}`\n\n"
+    if third_stream_url:
+        response_message += f"**🔗 1080p Direct URL:**\n`{third_stream_url}`\n\n"
     
-    rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])  
+    rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=response_message, reply_markup=rm, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ----------------- FIX YAHAN BHI HAI (FIX 2) -----------------
-# Yahan check kiya ja raha hai ki decode function se valid string mila ya None.
 @Client.on_message(filters.private & filters.text & ~filters.command(["account", "withdraw", "notify", "quality", "start", "update"]))
 async def link_start(client, message):
     if not message.text.startswith(LINK_URL):
@@ -300,12 +314,10 @@ async def link_start(client, message):
     
     original = await decode(link_part)
     
-    # Agar link decode nahi hua (galat tha), to user ko error do.
     if original is None:
         return await message.reply("Link Invalid or Corrupted")
 
     try:
-        # Ab humein pata hai ki 'original' ek valid string hai.
         u, user_id, id, sec, th = original.split("=")
     except ValueError:
         return await message.reply("Link Invalid")
@@ -323,7 +335,6 @@ async def link_start(client, message):
     encoded_url = f"{LINK_URL}?Tech_VJ={link}"
     rm=InlineKeyboardMarkup([[InlineKeyboardButton("🖇️ Open Link", url=encoded_url)]])
     await message.reply_text(text=f"<code>{encoded_url}</code>", reply_markup=rm)
-# ----------------- FIX END -----------------
 
 
 @Client.on_message(filters.private & filters.command("account"))
@@ -411,14 +422,14 @@ async def show_notify(client, message):
         
         sub = await client.ask(message.from_user.id, "Payment Is Cancelled Or Send Successfully. /send or /cancel")
         if sub.text == "/send":
-            record_visit(user_id, 0)  # Assuming you want to reset visits after payment
+            record_visit(user_id, 0)
             record_withdraw(user_id, False)
             await client.send_message(user_id, "Your Withdrawal Is Successfully Completed And Sended To Your Bank Account.")
             await message.reply("Success message sent to user.")
         elif sub.text == "/cancel":
             reason = await client.ask(message.from_user.id, "Send Me The Reason For Cancellation Of Payment")
             if reason.text:
-                record_withdraw(user_id, False) # Allow user to withdraw again
+                record_withdraw(user_id, False)
                 await client.send_message(user_id, f"Your Payment Cancelled - {reason.text}")
                 await message.reply("Cancellation message sent to user.")
         else:
