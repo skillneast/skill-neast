@@ -1,4 +1,4 @@
-"from pymongo import MongoClient
+from pymongo import MongoClient
 import motor.motor_asyncio
 from info import MONGODB_URI
 
@@ -9,7 +9,7 @@ collection = db['playscount']
 def record_visit(user: int, count: int):
     existing_visit = collection.find_one({
         "user": user
-    })   
+    })
     if not existing_visit:
         collection.insert_one({
             "user": user,
@@ -38,7 +38,7 @@ def get_count(user):
     })
     if existing_visit:
         return existing_visit["count"]
-    else: 
+    else:
         return None
 
 def get_withdraw(user):
@@ -50,12 +50,10 @@ def get_withdraw(user):
             return existing_visit["withdraw"]
         except:
             return False
-    else: 
+    else:
         return False
 
-
 class Database2:
-    
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
@@ -68,11 +66,11 @@ class Database2:
             b_name = None,
             c_link = None,
         )
-    
+
     async def add_user(self, id, name):
         user = self.new_user(id, name)
         await self.col.insert_one(user)
-    
+
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id':int(id)})
         return bool(user)
@@ -80,7 +78,6 @@ class Database2:
 checkdb = Database2(MONGODB_URI, "TechVJVideoPlayerBot")
 
 class Database:
-    
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
@@ -93,15 +90,15 @@ class Database:
             b_name = None,
             c_link = None,
         )
-    
+
     async def add_user(self, id, name):
         user = self.new_user(id, name)
         await self.col.insert_one(user)
-    
+
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id':int(id)})
         return bool(user)
-    
+
     async def total_users_count(self):
         count = await self.col.count_documents({})
         return count
@@ -126,4 +123,4 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user.get('c_link')
 
-db = Database(MONGODB_URI, "VJVideoPlayerBot")"
+db = Database(MONGODB_URI, "VJVideoPlayerBot")
