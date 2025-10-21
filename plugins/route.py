@@ -17,7 +17,13 @@ from TechVJ.util.time_format import get_readable_time
 from TechVJ.util.render_template import render_page
 from TechVJ.util.file_properties import get_file_ids
 
+import asyncio # <<<<<<<<<<<<<<<< NAYA IMPORT
+
 routes = web.RouteTableDef()
+
+# <<<<<<<<<<<<<<<<<<<< NAYA LOCK OBJECT
+# Global lock for Pyrogram client access to prevent concurrent database access issues
+pyrogram_db_lock = asyncio.Lock() 
 
 html_content = """
 <!DOCTYPE html>
@@ -98,7 +104,7 @@ async def root_route_handler(request):
     return web.Response(text=html_content, content_type='text/html')
 
 @routes.get(r"/{path}/{user_path}/{second}/{third}", allow_head=True)
-async def stream_handler(request: web.Request):
+async def stream_handler_player(request: web.Request): # Renamed to avoid conflict with /dl stream_handler
     try:
         path = request.match_info["path"]
         user_path = request.match_info["user_path"]
@@ -110,8 +116,9 @@ async def stream_handler(request: web.Request):
         thid = int(await decode(th))
         return web.Response(text=await render_page(id, user_id, secid, thid), content_type='text/html')
     except Exception as e:
+        logging.error(f"Error in stream_handler_player: {e}", exc_info=True)
         return web.Response(text=html_content, content_type='text/html')
-    return 
+    # No return None here, the except block returns a response or the try block does.
 
 @routes.post('/click-counter')
 async def handle_click(request):
@@ -126,23 +133,32 @@ async def handle_click(request):
         if is_chrome:
             visited_cookie = request.cookies.get('visited')
         else:
-            return
+            # Not a Chrome browser, or user-agent not indicating it's Chrome.
+            # You might want to log this or handle differently.
+            # For now, we'll silently return.
+            logging.info(f"Skipping click counter for non-Chrome user agent: {user_agent}")
+            return web.Response(status=200, text="Not processed for this browser.")
+
 
         if visited_cookie == today:
-            return
+            logging.info(f"User {user_id} already visited today. Skipping.")
+            return web.Response(status=200, text="Already visited today.")
         else:
-            response = web.Response(text="Hello, World!")
-            response.set_cookie('visited', today, max_age=24*60*60)
+            response = web.Response(text="Click counter updated!")
+            response.set_cookie('visited', today, max_age=24*60*60, httponly=True) # Added httponly for security
             u = get_count(user_id)
             if u:
                 c = int(u + 1)
                 record_visit(user_id, c)
+                logging.info(f"User {user_id} click count updated to {c}.")
             else:
                 c = int(1)
                 record_visit(user_id, c)
+                logging.info(f"User {user_id} first click recorded.")
             return response
-    except:
-        pass
+    except Exception as e: # Catch specific exceptions or log the exception
+        logging.error(f"Error in handle_click: {e}", exc_info=True)
+        return web.Response(status=500, text="Internal Server Error") # Return a proper error response
 
 @routes.get('/{short_link}', allow_head=True)
 async def get_original(request: web.Request):
@@ -152,7 +168,8 @@ async def get_original(request: web.Request):
         link = f"{STREAM_URL}link?{original}"
         raise web.HTTPFound(link)  # Redirect to the constructed link 
     else:
-        return web.Response(text=html_content, content_type='text/html')
+        logging.warning(f"Invalid short link received: {short_link}")
+        return web.Response(text=html_content, content_type='text/html', status=400) # Bad Request for invalid link
 
 @routes.get('/link', allow_head=True)
 async def visits(request: web.Request):
@@ -160,15 +177,22 @@ async def visits(request: web.Request):
     watch = request.query.get('w')
     second = request.query.get('s')
     third = request.query.get('t')
+    
+    # Ensure all query params are present to avoid errors or incomplete links
+    if not all([user, watch, second, third]):
+        logging.warning(f"Missing query parameters in /link route. Received: u={user}, w={watch}, s={second}, t={third}")
+        return web.Response(text="Missing link parameters.", status=400)
+
     data = await encode(watch)
-    user_id = await encode(user)
-    sec_id = await encode(second)
-    th_id = await encode(third)
-    link = f"{STREAM_URL}{data}/{user_id}/{sec_id}/{th_id}"
+    user_id_encoded = await encode(user) # Renamed to avoid confusion with actual user_id
+    sec_id_encoded = await encode(second) # Renamed
+    th_id_encoded = await encode(third) # Renamed
+    link = f"{STREAM_URL}{data}/{user_id_encoded}/{sec_id_encoded}/{th_id_encoded}"
     raise web.HTTPFound(link)  # Redirect to the constructed link
 
 @routes.get(r"/dl/{path:\S+}", allow_head=True)
-async def stream_handler(request: web.Request):
+async def stream_handler_dl(request: web.Request): # Renamed to avoid name conflict
+    logging.info(f"Stream handler called for path: {request.match_info['path']}")
     try:
         path = request.match_info["path"]
         match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
@@ -178,50 +202,74 @@ async def stream_handler(request: web.Request):
         else:
             id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
-        return await media_streamer(request, id, secure_hash)
+
+        logging.info(f"Acquiring Pyrogram DB lock for ID: {id}, Hash: {secure_hash}")
+        async with pyrogram_db_lock: # <<<<<<<<<<<<<<<< YAHAN LOCK USE HOGA
+            logging.info(f"Pyrogram DB lock acquired for ID: {id}. Calling media_streamer.")
+            response = await media_streamer(request, id, secure_hash)
+            logging.info(f"media_streamer returned for ID: {id}. Releasing Pyrogram DB lock.")
+            return response
+            
     except InvalidHash as e:
+        logging.error(f"InvalidHash error in stream_handler_dl: {e}", exc_info=True)
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
+        logging.error(f"FIleNotFound error in stream_handler_dl: {e}", exc_info=True)
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
+    except (AttributeError, BadStatusLine, ConnectionResetError) as e:
+        logging.warning(f"Connection related error in stream_handler_dl: {type(e).__name__}", exc_info=True)
+        pass # These are often transient network errors, just pass for now or log more specifically
     except Exception as e:
-        logging.critical(e.with_traceback(None))
+        logging.critical(f"Unhandled critical error in stream_handler_dl: {e}", exc_info=True)
         raise web.HTTPInternalServerError(text=str(e))
 
 class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
+    logging.debug(f"media_streamer executing for ID: {id}")
     range_header = request.headers.get("Range", 0)
     
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
     
     if MULTI_CLIENT:
-        logging.info(f"Client {index} is now serving {request.remote}")
+        logging.info(f"Client {index} is now serving {request.remote} for ID: {id}")
 
     if faster_client in class_cache:
         tg_connect = class_cache[faster_client]
-        logging.debug(f"Using cached ByteStreamer object for client {index}")
+        logging.debug(f"Using cached ByteStreamer object for client {index}, ID: {id}")
     else:
-        logging.debug(f"Creating new ByteStreamer object for client {index}")
+        logging.debug(f"Creating new ByteStreamer object for client {index}, ID: {id}")
         tg_connect = ByteStreamer(faster_client)
         class_cache[faster_client] = tg_connect
-    logging.debug("before calling get_file_properties")
-    file_id = await tg_connect.get_file_properties(id)
-    logging.debug("after calling get_file_properties")
     
+    logging.debug(f"Before calling get_file_properties for ID: {id}")
+    file_id = await tg_connect.get_file_properties(id)
+    logging.debug(f"After calling get_file_properties for ID: {id}")
+    
+    if not file_id:
+        logging.error(f"File properties not found for ID: {id}. This might indicate an issue with get_file_properties or file not existing.")
+        raise FIleNotFound(f"File with ID {id} not found.")
+
+    # Hash check, if needed
+    # if secure_hash and secure_hash != get_hash_of_file(file_id): # You'd need to implement get_hash_of_file
+    #     raise InvalidHash("Invalid file hash.")
+
     file_size = file_id.file_size
 
     if range_header:
         from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
         from_bytes = int(from_bytes)
         until_bytes = int(until_bytes) if until_bytes else file_size - 1
+        logging.debug(f"Range header present: bytes {from_bytes}-{until_bytes}/{file_size}")
     else:
         from_bytes = request.http_range.start or 0
         until_bytes = (request.http_range.stop or file_size) - 1
+        logging.debug(f"No Range header. Serving full file from {from_bytes} to {until_bytes}/{file_size}")
+
 
     if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
+        logging.warning(f"Range not satisfiable for ID: {id}. Requested range: {from_bytes}-{until_bytes}, File size: {file_size}")
         return web.Response(
             status=416,
             body="416: Range not satisfiable",
@@ -237,6 +285,8 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
     req_length = until_bytes - from_bytes + 1
     part_count = math.ceil(until_bytes / chunk_size) - math.floor(offset / chunk_size)
+    
+    logging.debug(f"Yielding file for ID: {id}, Offset: {offset}, Length: {req_length}")
     body = tg_connect.yield_file(
         file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
     )
@@ -258,6 +308,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             mime_type = "application/octet-stream"
             file_name = f"{secrets.token_hex(2)}.unknown"
 
+    logging.debug(f"Serving response for ID: {id} with MIME: {mime_type}, Filename: {file_name}")
     return web.Response(
         status=206 if range_header else 200,
         body=body,
